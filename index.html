@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dot Demo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <canvas id="demoCanvas"></canvas>
+    <section>
+        <div id="controlPanel">
+            <label for="beamLengthInput">Beam Length:</label>
+            <input type="range" id="beamLengthInput" min="10" max="100" value="40" step="1">
+            <span id="beamLengthValue">40</span>
+
+            <label for="zoomFactorInput">Zoom Factor:</label>
+            <input type="range" id="zoomFactorInput" min="1" max="50" step="1" value="20">
+            <span id="zoomFactorValue">20</span>
+        </div>
+        <div id="debug"></div>
+    </section>
+    <script src="script.js"></script>
+</body>
+
+</html>
