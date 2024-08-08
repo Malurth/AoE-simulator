@@ -8,7 +8,7 @@ canvas.height = window.innerHeight;
 
 // Zoom factor: Controls how much the canvas is zoomed in
 let zoomFactor = 20;
-const beamWidth = 4;
+const beamWidth = 0.2;
 
 // Maximum beam length in pixels
 let baseBeamLength = 40; // Represents 40 meters
@@ -97,10 +97,11 @@ class Enemy extends Entity {
   constructor(x, y) {
     super(x, y, "#ff0000"); // Red color for enemies
     this.isHit = false; // Initialize as not hit
+    this.aoeHit = false;
   }
 
   draw(ctx) {
-    this.color = this.isHit ? "#00ff00" : "#ff0000";
+    this.color = this.aoeHit ? "#FF00FF" : this.isHit ? "#00ff00" : "#ff0000";
     super.draw(ctx); // Draw the enemy as before
 
     if (this.isHit) {
@@ -109,11 +110,19 @@ class Enemy extends Entity {
   }
 
   drawHitRing(ctx) {
+    const hitRingColor = "#00ff00"; // Define the color for the hit ring
+
     ctx.beginPath();
     ctx.arc(this.x, this.y, 6, 0, Math.PI * 2);
-    ctx.strokeStyle = "#00ff00"; // Color of the ring
+    ctx.strokeStyle = hitRingColor; // Color of the ring
     ctx.lineWidth = 2 / zoomFactor; // Adjust line width
     ctx.stroke();
+
+    // Fill the circle with a transparent color
+    ctx.globalAlpha = 0.2; // Set transparency level (0.0 to 1.0)
+    ctx.fillStyle = hitRingColor; // Use the same color as the ring
+    ctx.fill();
+    ctx.globalAlpha = 1.0; // Reset transparency to default
   }
 }
 
@@ -132,6 +141,9 @@ for (let i = 0; i < 12; i++) {
 let mouseX = canvas.width / 2 / zoomFactor;
 let mouseY = canvas.height / 2 / zoomFactor;
 
+// Flag to track LMB state
+let isMouseDown = false;
+
 // Calculate the distance between two points
 function calculateDistance(x1, y1, x2, y2) {
   return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
@@ -140,12 +152,14 @@ function calculateDistance(x1, y1, x2, y2) {
 function checkBeamCollision(startX, startY, endX, endY) {
   let closestPoint = { x: endX, y: endY };
   let intersection = false;
+  let enemyHit = false; // Track if an enemy is hit by the main beam
 
   player.updateSortedEnemies(enemies);
 
-  // Reset isHit
+  // Reset isHit and aoeHit
   for (let enemy of player.sortedEnemies) {
     enemy.isHit = false;
+    enemy.aoeHit = false;
   }
 
   for (let enemy of player.sortedEnemies) {
@@ -158,10 +172,12 @@ function checkBeamCollision(startX, startY, endX, endY) {
       const distance = calculateDistance(startX, startY, enemy.x, enemy.y);
       if (distance <= enemy.radius && !enemy.isHit) {
         enemy.isHit = true;
+        enemyHit = true; // Mark enemy as hit by the main beam
         return {
           intersected: true,
           endX: enemy.x,
           endY: enemy.y,
+          enemyHit: enemyHit, // Return enemy hit status
         };
       }
       continue;
@@ -193,10 +209,12 @@ function checkBeamCollision(startX, startY, endX, endY) {
 
     if (closestDistance <= enemy.radius) {
       enemy.isHit = true;
+      enemyHit = true; // Mark enemy as hit by the main beam
       return {
         intersected: true,
         endX: closestX,
         endY: closestY,
+        enemyHit: enemyHit, // Return enemy hit status
       };
     }
   }
@@ -205,10 +223,10 @@ function checkBeamCollision(startX, startY, endX, endY) {
     intersected: intersection,
     endX,
     endY,
+    enemyHit: enemyHit, // Return enemy hit status
   };
 }
 
-// Draw the player, enemies, and the line to the mouse
 function draw() {
   ctx.clearRect(0, 0, canvas.width / zoomFactor, canvas.height / zoomFactor);
 
@@ -239,16 +257,51 @@ function draw() {
     collisionResult.endY
   );
 
+  // Define the beam color
+  const beamColor = "#ffffff";
+
   // Draw the line from the player to the calculated beam endpoint
   ctx.beginPath();
   ctx.moveTo(player.x, player.y);
   ctx.lineTo(collisionResult.endX, collisionResult.endY);
-  ctx.strokeStyle = "#ffffff";
-  ctx.lineWidth = beamWidth / zoomFactor;
+  ctx.strokeStyle = beamColor;
+  ctx.lineWidth = beamWidth;
   ctx.stroke();
 
   // Draw the player
   player.draw(ctx);
+
+  // Draw the 3m radius circle if LMB is held down or an enemy is hit
+  if (isMouseDown || collisionResult.enemyHit) {
+    ctx.beginPath();
+    ctx.arc(collisionResult.endX, collisionResult.endY, 3, 0, Math.PI * 2);
+    ctx.strokeStyle = beamColor; // Color of the circle
+    ctx.lineWidth = 1 / zoomFactor; // Adjust line width
+    ctx.stroke();
+
+    // Fill the circle with a transparent color
+    ctx.globalAlpha = 0.2; // Set transparency level (0.0 to 1.0)
+    ctx.fillStyle = beamColor; // Use the same color as the beam
+    ctx.fill();
+    ctx.globalAlpha = 1.0; // Reset transparency to default
+
+    // Check for enemies within the smaller AoE
+    for (let enemy of enemies) {
+      if (!enemy.isHit) {
+        // Ensure not already hit by the main beam
+        const distanceToAoE = calculateDistance(
+          collisionResult.endX,
+          collisionResult.endY,
+          enemy.x,
+          enemy.y
+        );
+        if (distanceToAoE <= 3) {
+          // 3m AoE radius
+          enemy.aoeHit = true;
+        }
+      }
+    }
+  }
 
   // Draw all enemies
   enemies.forEach((enemy) => enemy.draw(ctx));
@@ -305,11 +358,27 @@ function update() {
   requestAnimationFrame(update);
 }
 
-// Update mouse position
+// Update mouse position and LMB state
 canvas.addEventListener("mousemove", (event) => {
   mouseX = event.clientX / zoomFactor;
   mouseY = event.clientY / zoomFactor;
   draw();
+});
+
+canvas.addEventListener("mousedown", (event) => {
+  if (event.button === 0) {
+    // Left mouse button
+    isMouseDown = true;
+    draw();
+  }
+});
+
+canvas.addEventListener("mouseup", (event) => {
+  if (event.button === 0) {
+    // Left mouse button
+    isMouseDown = false;
+    draw();
+  }
 });
 
 // Initial draw and start the update loop
