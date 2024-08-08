@@ -8,17 +8,24 @@ canvas.height = window.innerHeight;
 
 // Zoom factor: Controls how much the canvas is zoomed in
 let zoomFactor = 20;
+const startingEnemies = 20;
 const beamWidth = 0.2;
+let toridBaseAoE = 3;
+let aoeOpacity = 0.1;
 
 // Maximum beam length in pixels
 let baseBeamLength = 40; // Represents 40 meters
 let currentBeamLength = baseBeamLength; // Initialize current length with base length
+let primedFirestorm = false;
 
 // Control Panel
 const beamLengthInput = document.getElementById("beamLengthInput");
 const zoomFactorInput = document.getElementById("zoomFactorInput");
 const beamLengthValue = document.getElementById("beamLengthValue");
 const zoomFactorValue = document.getElementById("zoomFactorValue");
+const primedFirestormCheckbox = document.getElementById(
+  "primedFirestormCheckbox"
+);
 const debugElement = document.getElementById("debug");
 
 beamLengthInput.addEventListener("input", () => {
@@ -31,6 +38,12 @@ zoomFactorInput.addEventListener("input", () => {
   zoomFactor = parseFloat(zoomFactorInput.value);
   zoomFactorValue.textContent = zoomFactor;
   ctx.setTransform(zoomFactor, 0, 0, zoomFactor, 0, 0);
+  draw();
+});
+
+primedFirestormCheckbox.addEventListener("change", (event) => {
+  primedFirestorm = event.target.checked;
+  toridBaseAoE = primedFirestorm ? 4.32 : 3;
   draw();
 });
 
@@ -104,13 +117,13 @@ class Enemy extends Entity {
     this.color = this.aoeHit ? "#FF00FF" : this.isHit ? "#00ff00" : "#ff0000";
     super.draw(ctx); // Draw the enemy as before
 
-    if (this.isHit) {
+    if (this.isHit || this.aoeHit) {
       this.drawHitRing(ctx); // Draw the ring if hit
     }
   }
 
   drawHitRing(ctx) {
-    const hitRingColor = "#00ff00"; // Define the color for the hit ring
+    const hitRingColor = this.color; // Define the color for the hit ring
 
     ctx.beginPath();
     ctx.arc(this.x, this.y, 6, 0, Math.PI * 2);
@@ -119,7 +132,7 @@ class Enemy extends Entity {
     ctx.stroke();
 
     // Fill the circle with a transparent color
-    ctx.globalAlpha = 0.2; // Set transparency level (0.0 to 1.0)
+    ctx.globalAlpha = aoeOpacity; // Set transparency level (0.0 to 1.0)
     ctx.fillStyle = hitRingColor; // Use the same color as the ring
     ctx.fill();
     ctx.globalAlpha = 1.0; // Reset transparency to default
@@ -131,7 +144,7 @@ const player = new Player(canvas.width / 2, canvas.height / 2);
 
 // Create enemies at random positions closer to the center
 const enemies = [];
-for (let i = 0; i < 12; i++) {
+for (let i = 0; i < startingEnemies; i++) {
   const x = Math.random() * (canvas.width / 2) + canvas.width / 4;
   const y = Math.random() * (canvas.height / 2) + canvas.height / 4;
   enemies.push(new Enemy(x, y));
@@ -274,13 +287,19 @@ function draw() {
   // Draw the 3m radius circle if LMB is held down or an enemy is hit
   if (isMouseDown || collisionResult.enemyHit) {
     ctx.beginPath();
-    ctx.arc(collisionResult.endX, collisionResult.endY, 3, 0, Math.PI * 2);
+    ctx.arc(
+      collisionResult.endX,
+      collisionResult.endY,
+      toridBaseAoE,
+      0,
+      Math.PI * 2
+    );
     ctx.strokeStyle = beamColor; // Color of the circle
     ctx.lineWidth = 1 / zoomFactor; // Adjust line width
     ctx.stroke();
 
     // Fill the circle with a transparent color
-    ctx.globalAlpha = 0.2; // Set transparency level (0.0 to 1.0)
+    ctx.globalAlpha = aoeOpacity; // Set transparency level (0.0 to 1.0)
     ctx.fillStyle = beamColor; // Use the same color as the beam
     ctx.fill();
     ctx.globalAlpha = 1.0; // Reset transparency to default
@@ -295,7 +314,7 @@ function draw() {
           enemy.x,
           enemy.y
         );
-        if (distanceToAoE <= 3) {
+        if (distanceToAoE <= toridBaseAoE) {
           // 3m AoE radius
           enemy.aoeHit = true;
         }
