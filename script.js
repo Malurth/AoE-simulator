@@ -45,9 +45,18 @@ const toggleCirclesCheckbox = document.getElementById("toggleCircles");
 const toggleBeamsCheckbox = document.getElementById("toggleBeams");
 const toggleEnemyMovementCheckbox = document.getElementById("toggleEnemyMovement");
 
-let showCircles = toggleCirclesCheckbox.checked;
+let showCircles = toggleCirclesCheckbox.dataset.state;
 let showBeams = toggleBeamsCheckbox.checked;
 let enemyMovementEnabled = toggleEnemyMovementCheckbox.checked;
+
+// Set initial background color based on the data-state attribute
+if (showCircles === "full") {
+  toggleCirclesCheckbox.nextElementSibling.style.backgroundColor = "green";
+} else if (showCircles === "partial") {
+  toggleCirclesCheckbox.nextElementSibling.style.backgroundColor = "orange";
+} else {
+  toggleCirclesCheckbox.nextElementSibling.style.backgroundColor = "red";
+}
 
 toggleEnemyMovementCheckbox.addEventListener("change", () => {
   enemyMovementEnabled = toggleEnemyMovementCheckbox.checked;
@@ -59,8 +68,19 @@ enemySpeedInput.addEventListener("input", () => {
   updateEnemyVelocities();
 });
 
+const circleStates = ["full", "partial", "off"];
+const circleColors = {
+  full: "green",
+  partial: "orange",
+  off: "red",
+};
+
 toggleCirclesCheckbox.addEventListener("change", () => {
-  showCircles = toggleCirclesCheckbox.checked;
+  const currentState = toggleCirclesCheckbox.dataset.state;
+  const nextState = circleStates[(circleStates.indexOf(currentState) + 1) % circleStates.length];
+  toggleCirclesCheckbox.dataset.state = nextState;
+  toggleCirclesCheckbox.nextElementSibling.style.backgroundColor = circleColors[nextState];
+  showCircles = nextState;
   draw();
 });
 
@@ -264,7 +284,7 @@ class Enemy extends Entity {
       ctx.fill();
     }
 
-    if (showCircles) {
+    if (showCircles !== "off") {
       if (this.isHit) {
         this.drawHitRing(mainBeamHitColor, ctx); // Draw the ring if hit
       }
@@ -358,7 +378,7 @@ class Chain {
           enemy.isHit = true;
         } else {
           enemy.aoeHit = true;
-          if (showCircles) {
+          if (showCircles === "full") {
             enemy.drawHitRing(aoeHitColor, ctx); //there can be multiple AoE chains, stacking transparent circles makes it easier to visualize effect
           }
         }
