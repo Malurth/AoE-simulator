@@ -21,7 +21,7 @@ let aoeHitColor = "#FF00FF";
 let beamColor = "#FFFFFF";
 let playerColor = "#61dafb";
 
-let multishot = 3;
+let multishot = 300;
 let enemySpeed = 1;
 let enemyCount = 50;
 let zoomFactor = 50;
@@ -51,11 +51,16 @@ const toggleCirclesCheckbox = document.getElementById("toggleCircles");
 const toggleBeamsCheckbox = document.getElementById("toggleBeams");
 const toggleEnemyMovementCheckbox = document.getElementById("toggleEnemyMovement");
 const toggleDamageNumbersCheckbox = document.getElementById("toggleDamageNumbers");
+const useMultishotCheckbox = document.getElementById("useMultishot");
+const useMultishotAs100PercentCheckbox = document.getElementById("useMultishotAs100Percent");
+const multishotCountInput = document.getElementById("multishotCountInput");
 
 let showCircles = toggleCirclesCheckbox.dataset.state;
 let showBeams = toggleBeamsCheckbox.checked;
 let enemyMovementEnabled = toggleEnemyMovementCheckbox.checked;
 let showDamageNumbers = toggleDamageNumbersCheckbox.checked;
+let useMultishot = useMultishotCheckbox.checked;
+let useMultishotAs100Percent = useMultishotAs100PercentCheckbox.checked;
 
 // Set initial background color based on the data-state attribute
 if (showCircles === "full") {
@@ -100,6 +105,24 @@ toggleBeamsCheckbox.addEventListener("change", () => {
 toggleDamageNumbersCheckbox.addEventListener("change", () => {
   showDamageNumbers = toggleDamageNumbersCheckbox.checked;
   draw();
+});
+
+useMultishotCheckbox.addEventListener("change", () => {
+  useMultishot = useMultishotCheckbox.checked;
+  draw();
+});
+
+useMultishotAs100PercentCheckbox.addEventListener("change", () => {
+  useMultishotAs100Percent = useMultishotAs100PercentCheckbox.checked;
+  draw();
+});
+
+multishotCountInput.addEventListener("input", () => {
+  const value = parseInt(multishotCountInput.value);
+  if (!isNaN(value) && value >= 100 && value <= 1000) {
+    multishot = value;
+    draw();
+  }
 });
 
 resetButton.addEventListener("click", resetToridVariables);
@@ -157,6 +180,9 @@ document.getElementById("toggleCircles").checked = showCircles;
 document.getElementById("toggleBeams").checked = showBeams;
 document.getElementById("toggleEnemyMovement").checked = enemyMovementEnabled;
 document.getElementById("toggleDamageNumbers").checked = showDamageNumbers;
+document.getElementById("useMultishot").checked = useMultishot;
+document.getElementById("useMultishotAs100Percent").checked = useMultishotAs100Percent;
+document.getElementById("multishotCountInput").value = multishot;
 
 document.getElementById("enemySpeedInput").value = enemySpeed;
 document.getElementById("enemySpeedValue").textContent = enemySpeed;
@@ -309,12 +335,12 @@ class Enemy extends Entity {
 
     // Calculate main beam damage
     if (this.isPrimaryMainBeamTarget) {
-      totalMainBeamDamage += 100 * multishot;
+      totalMainBeamDamage += useMultishot ? multishot : 100;
     }
 
     let mainBeamChainDepth = this.chains.filter((c) => c.chain.isMainBeam).reduce((min, c) => Math.min(min, c.depth), Infinity);
     if (mainBeamChainDepth !== Infinity) {
-      totalMainBeamDamage += 100 * Math.pow(0.75, mainBeamChainDepth) * multishot;
+      totalMainBeamDamage += 100 * Math.pow(0.75, mainBeamChainDepth) * (useMultishot ? multishot / 100 : 1);
     }
 
     // Calculate AoE damage
@@ -330,6 +356,12 @@ class Enemy extends Entity {
       });
 
     let totalDamage = totalMainBeamDamage + totalAoeDamage;
+
+    if (useMultishotAs100Percent) {
+      totalDamage /= multishot / 100;
+      totalMainBeamDamage /= multishot / 100;
+      totalAoeDamage /= multishot / 100;
+    }
 
     return {
       totalDamage,

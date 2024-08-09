@@ -122,7 +122,6 @@ input[type="checkbox"] + label {
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s;
-  margin-left: 10px;
 }
 
 /* Change background color when checked */
@@ -141,4 +140,8 @@ input[type="checkbox"]:checked + label {
   top: 0;
   right: 0;
   font-size: 12px;
+}
+
+input[type="text"] {
+  width: 50px;
 }

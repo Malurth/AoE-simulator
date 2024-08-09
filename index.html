@@ -55,7 +55,15 @@
                 <input type="range" id="chainRadiusInput" min="1" max="10" step="1">
                 <span id="chainRadiusValue">6</span>
             </div>
-            <button id="resetButton">Reset</button>
+            <div>
+                <button id="resetButton">Reset</button>
+                <input type="checkbox" id="useMultishot" checked>
+                <label for="useMultishot">Use Multishot</label>
+                <input type="checkbox" id="useMultishotAs100Percent" checked>
+                <label for="useMultishotAs100Percent">as 100%</label>
+                <input type="text" id="multishotCountInput" min="100" max="1000" step="1">
+            </div>
+
         </div>
     </section>
     <section class="panelContainer" id="lowerPanelContainer">
