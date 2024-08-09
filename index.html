@@ -20,9 +20,20 @@
             <input type="range" id="zoomFactorInput" min="1" max="50" step="1" value="20">
             <span id="zoomFactorValue">20</span>
 
-            Hold Left Mouse Button to toggle Primed Firestorm.
+            <label for="enemyCountInput">Enemy Count:</label>
+            <input type="range" id="enemyCountInput" min="1" max="200" step="1" value="20">
+            <span id="enemyCountValue">50</span>
+
+            <label for="toggleCircles">Show Chain Range Indicators:</label>
+            <input type="checkbox" id="toggleCircles" checked>
+
+            <label for="toggleBeams">Show Connecting Beams:</label>
+            <input type="checkbox" id="toggleBeams" checked>
+
+            <button id="resetButton">Reset</button>
         </div>
         <div id="debug"></div>
+        <div id="infoPanel">Hold Left Mouse Button to toggle Primed Firestorm.</div>
     </section>
     <script src="script.js"></script>
 </body>

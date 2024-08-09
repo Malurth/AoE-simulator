@@ -13,7 +13,7 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const startingEnemies = 50;
+let enemyCount = 50;
 const beamWidth = 0.2;
 const entitySize = 0.4;
 const chainRadius = 6; // 6m chain radius
@@ -22,7 +22,7 @@ const enemyColor = "#FF0000";
 const mainBeamHitColor = "#00FF00";
 const aoeHitColor = "#FF00FF";
 
-let zoomFactor = 25;
+let zoomFactor = 30;
 let toridBaseAoE = 3;
 let aoeOpacity = 0.1;
 
@@ -33,9 +33,31 @@ let currentBeamLength = baseBeamLength; // Initialize current length with base l
 // Control Panel
 const beamLengthInput = document.getElementById("beamLengthInput");
 const zoomFactorInput = document.getElementById("zoomFactorInput");
+const enemyCountInput = document.getElementById("enemyCountInput");
 const beamLengthValue = document.getElementById("beamLengthValue");
 const zoomFactorValue = document.getElementById("zoomFactorValue");
+const enemyCountValue = document.getElementById("enemyCountValue");
+const resetButton = document.getElementById("resetButton");
 const debugElement = document.getElementById("debug");
+
+// Add event listeners for the checkboxes
+const toggleCirclesCheckbox = document.getElementById("toggleCircles");
+const toggleBeamsCheckbox = document.getElementById("toggleBeams");
+
+let showCircles = toggleCirclesCheckbox.checked;
+let showBeams = toggleBeamsCheckbox.checked;
+
+toggleCirclesCheckbox.addEventListener("change", () => {
+  showCircles = toggleCirclesCheckbox.checked;
+  draw();
+});
+
+toggleBeamsCheckbox.addEventListener("change", () => {
+  showBeams = toggleBeamsCheckbox.checked;
+  draw();
+});
+
+resetButton.addEventListener("click", resetGame);
 
 beamLengthInput.addEventListener("input", () => {
   baseBeamLength = parseFloat(beamLengthInput.value);
@@ -47,6 +69,14 @@ zoomFactorInput.addEventListener("input", () => {
   zoomFactor = parseFloat(zoomFactorInput.value);
   zoomFactorValue.textContent = zoomFactor;
   ctx.setTransform(zoomFactor, 0, 0, zoomFactor, 0, 0);
+  resetGame();
+  draw();
+});
+
+enemyCountInput.addEventListener("input", () => {
+  enemyCount = parseFloat(enemyCountInput.value);
+  enemyCountValue.textContent = enemyCount;
+  resetGame();
   draw();
 });
 
@@ -107,18 +137,35 @@ class Enemy extends Entity {
   }
 
   draw(ctx) {
-    this.color = this.isHit
-      ? mainBeamHitColor
-      : this.aoeHit
-      ? aoeHitColor
-      : enemyColor;
-    super.draw(ctx); // Draw the enemy as before
-
-    if (this.isHit) {
-      this.drawHitRing(mainBeamHitColor, ctx); // Draw the ring if hit
+    // Determine the color based on hit status
+    if (this.isHit && this.aoeHit) {
+      this.color = mainBeamHitColor; // Green for main beam hit
+    } else if (this.aoeHit) {
+      this.color = aoeHitColor; // Purple for AoE hit
+    } else if (this.isHit) {
+      this.color = mainBeamHitColor; // Green for main beam hit
+    } else {
+      this.color = enemyColor; // Default enemy color
     }
-    if (this.aoeHit) {
-      this.drawHitRing(aoeHitColor, ctx); // Draw the ring if hit
+
+    // Draw the main circle
+    super.draw(ctx);
+
+    // Draw the smaller inner circle if hit by both
+    if (this.isHit && this.aoeHit) {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, entitySize / 2, 0, Math.PI * 2);
+      ctx.fillStyle = aoeHitColor; // Purple for the inner circle
+      ctx.fill();
+    }
+
+    if (showCircles) {
+      if (this.isHit) {
+        this.drawHitRing(mainBeamHitColor, ctx); // Draw the ring if hit
+      }
+      if (this.aoeHit) {
+        this.drawHitRing(aoeHitColor, ctx); // Draw the ring if hit
+      }
     }
   }
 
@@ -192,6 +239,8 @@ class Chain {
   }
 
   drawChainLinks(ctx) {
+    if (!showBeams) return; // Skip drawing if beams are toggled off
+
     this.isMainBeam
       ? (ctx.strokeStyle = mainBeamHitColor)
       : (ctx.strokeStyle = aoeHitColor);
@@ -212,7 +261,7 @@ const player = new Player(canvas.width / 2, canvas.height / 2);
 
 // Create enemies at random positions
 const enemies = [];
-for (let i = 0; i < startingEnemies; i++) {
+for (let i = 0; i < enemyCount; i++) {
   const x = (Math.random() * 0.8 + 0.1) * canvas.width;
   const y = (Math.random() * 0.8 + 0.1) * canvas.height;
   enemies.push(new Enemy(x, y));
@@ -355,7 +404,7 @@ function draw() {
   if (collisionResult.enemyHit) {
     mainBeamDirectHits++;
   }
-  // Draw the 3m radius circle if LMB is held down or an enemy is hit
+  // Draw the beam AoE if LMB is held down or an enemy is hit
   ctx.beginPath();
   ctx.arc(
     collisionResult.endX,
@@ -480,6 +529,23 @@ canvas.addEventListener("mouseup", (event) => {
     draw();
   }
 });
+
+function resetGame() {
+  // Reset player position to the center of the screen
+  player.x = canvas.width / 2 / zoomFactor;
+  player.y = canvas.height / 2 / zoomFactor;
+
+  // Clear and repopulate enemies
+  enemies.length = 0;
+  for (let i = 0; i < enemyCount; i++) {
+    const x = (Math.random() * 0.8 + 0.1) * canvas.width;
+    const y = (Math.random() * 0.8 + 0.1) * canvas.height;
+    enemies.push(new Enemy(x, y));
+  }
+
+  // Redraw the canvas
+  draw();
+}
 
 // Initial draw and start the update loop
 draw();
