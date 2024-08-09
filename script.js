@@ -24,7 +24,7 @@ let beamColor = "#FFFFFF";
 let playerColor = "#61dafb";
 
 let enemyCount = 50;
-let zoomFactor = 30;
+let zoomFactor = 50;
 let toridBaseAoE = 3;
 let aoeOpacity = 0.05;
 let baseBeamLength = 40;
@@ -235,6 +235,15 @@ class Enemy extends Entity {
     this.velocityX = ((Math.random() - 0.5) * enemySpeed) / zoomFactor; // Random initial velocity
     this.velocityY = ((Math.random() - 0.5) * enemySpeed) / zoomFactor; // Random initial velocity
     this.initialDirection = { x: this.velocityX, y: this.velocityY }; // Store initial direction
+    this.chains = []; // Store chains and their depths
+  }
+
+  addChainInfo(chain, depth) {
+    this.chains.push({ chain, depth });
+  }
+
+  clearChainInfo() {
+    this.chains = [];
   }
 
   draw(ctx) {
@@ -260,6 +269,12 @@ class Enemy extends Entity {
         this.drawHitRing(aoeHitColor, ctx); // Draw the ring if hit
       }
     }
+
+    // Draw the number of chains above the enemy in bold
+    ctx.font = `bold 0.4px Arial`;
+    ctx.fillStyle = "#000000";
+    ctx.textAlign = "center";
+    ctx.fillText(this.chains.length, this.x, this.y + this.radius / 2.8);
   }
 
   drawHitRing(color, ctx) {
@@ -319,10 +334,10 @@ class Chain {
     this.isMainBeam = isMainBeam;
     this.chainedEnemies = new Set([startEnemy]);
     this.chainLinks = [];
-    this.chainHits(startEnemy, maxChains);
+    this.chainHits(startEnemy, maxChains, 0); // Pass chain depth
   }
 
-  chainHits(currentEnemy, remainingChains) {
+  chainHits(currentEnemy, remainingChains, depth) {
     if (remainingChains <= 0) return;
 
     currentEnemy.updateSortedEnemies(this.enemies);
@@ -340,11 +355,16 @@ class Chain {
           enemy.isHit = true;
         } else {
           enemy.aoeHit = true;
-          enemy.drawHitRing(aoeHitColor, ctx); //there can be multiple AoE chains, stacking transparent circles makes it easier to visualize effect
+          if (showCircles) {
+            enemy.drawHitRing(aoeHitColor, ctx); //there can be multiple AoE chains, stacking transparent circles makes it easier to visualize effect
+          }
         }
 
+        // Update enemy chain info
+        enemy.addChainInfo(this, depth + 1);
+
         // Chain to the next enemy
-        this.chainHits(enemy, remainingChains - 1);
+        this.chainHits(enemy, remainingChains - 1, depth + 1);
         break;
       }
     }
@@ -394,6 +414,7 @@ function checkBeamCollision(startX, startY, endX, endY) {
   for (let enemy of player.sortedEnemies) {
     enemy.isHit = false;
     enemy.aoeHit = false;
+    enemy.clearChainInfo(); // Clear previous chain info
   }
 
   for (let enemy of player.sortedEnemies) {
