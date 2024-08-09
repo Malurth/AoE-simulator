@@ -1,4 +1,5 @@
 //TODO: visualize overlaps better
+//TODO: --needs better visualization of multiple aoe overlaps
 //TODO: enemy movement?
 //TODO: general cleanup/refactor and un-GPT-ifying lol
 
@@ -13,19 +14,20 @@ canvas.height = window.innerHeight;
 let enemyCount = 50;
 const beamWidth = 0.2;
 const entitySize = 0.4;
-const chainRadius = 6; // 6m chain radius
+const chainRadius = 6;
 
-const enemyColor = "#FF0000";
-const mainBeamHitColor = "#00FF00";
-const aoeHitColor = "#FF00FF";
+let enemyColor = "#FF0000";
+let mainBeamHitColor = "#00FF00";
+let aoeHitColor = "#FF00FF";
+let beamColor = "#FFFFFF";
+let playerColor = "#61dafb";
 
 let zoomFactor = 30;
 let toridBaseAoE = 3;
 let aoeOpacity = 0.1;
 
-// Maximum beam length in pixels
-let baseBeamLength = 40; // Represents 40 meters
-let currentBeamLength = baseBeamLength; // Initialize current length with base length
+let baseBeamLength = 40;
+let currentBeamLength = baseBeamLength;
 
 // Control Panel
 const beamLengthInput = document.getElementById("beamLengthInput");
@@ -36,8 +38,6 @@ const zoomFactorValue = document.getElementById("zoomFactorValue");
 const enemyCountValue = document.getElementById("enemyCountValue");
 const resetButton = document.getElementById("resetButton");
 const debugElement = document.getElementById("debug");
-
-// Add event listeners for the checkboxes
 const toggleCirclesCheckbox = document.getElementById("toggleCircles");
 const toggleBeamsCheckbox = document.getElementById("toggleBeams");
 
@@ -59,7 +59,7 @@ resetButton.addEventListener("click", resetGame);
 beamLengthInput.addEventListener("input", () => {
   baseBeamLength = parseFloat(beamLengthInput.value);
   beamLengthValue.textContent = baseBeamLength;
-  draw(); // Redraw the canvas to reflect the new beam length
+  draw();
 });
 
 zoomFactorInput.addEventListener("input", () => {
@@ -90,20 +90,95 @@ document.getElementById("enemyCountValue").textContent = enemyCount;
 document.getElementById("toggleCircles").checked = showCircles;
 document.getElementById("toggleBeams").checked = showBeams;
 
+// Set legend colors dynamically
+document.getElementById("enemyColor").style.backgroundColor = enemyColor;
+document.getElementById("beamHitColor").style.backgroundColor =
+  mainBeamHitColor;
+document.getElementById("aoeHitColor").style.backgroundColor = aoeHitColor;
+document.getElementById("beamColor").style.backgroundColor = beamColor;
+document.getElementById("playerColor").style.backgroundColor = playerColor;
+
+// Add event listeners to color pickers
+document.getElementById("enemyColorPicker").value = enemyColor;
+document.getElementById("beamHitColorPicker").value = mainBeamHitColor;
+document.getElementById("aoeHitColorPicker").value = aoeHitColor;
+document.getElementById("beamColorPicker").value = beamColor;
+document.getElementById("playerColorPicker").value = playerColor;
+
+document.getElementById("enemyColor").addEventListener("click", () => {
+  document.getElementById("enemyColorPicker").click();
+});
+
+document.getElementById("beamHitColor").addEventListener("click", () => {
+  document.getElementById("beamHitColorPicker").click();
+});
+
+document.getElementById("aoeHitColor").addEventListener("click", () => {
+  document.getElementById("aoeHitColorPicker").click();
+});
+
+document.getElementById("beamColor").addEventListener("click", () => {
+  document.getElementById("beamColorPicker").click();
+});
+
+document.getElementById("playerColor").addEventListener("click", () => {
+  document.getElementById("playerColorPicker").click();
+});
+
+document
+  .getElementById("enemyColorPicker")
+  .addEventListener("input", (event) => {
+    enemyColor = event.target.value;
+    document.getElementById("enemyColor").style.backgroundColor = enemyColor;
+    draw();
+  });
+
+document
+  .getElementById("beamHitColorPicker")
+  .addEventListener("input", (event) => {
+    mainBeamHitColor = event.target.value;
+    document.getElementById("beamHitColor").style.backgroundColor =
+      mainBeamHitColor;
+    draw();
+  });
+
+document
+  .getElementById("aoeHitColorPicker")
+  .addEventListener("input", (event) => {
+    aoeHitColor = event.target.value;
+    document.getElementById("aoeHitColor").style.backgroundColor = aoeHitColor;
+    draw();
+  });
+
+document
+  .getElementById("beamColorPicker")
+  .addEventListener("input", (event) => {
+    beamColor = event.target.value;
+    document.getElementById("beamColor").style.backgroundColor = beamColor;
+    draw();
+  });
+
+document
+  .getElementById("playerColorPicker")
+  .addEventListener("input", (event) => {
+    playerColor = event.target.value;
+    document.getElementById("playerColor").style.backgroundColor = playerColor;
+    player.color = playerColor; // Update player color
+    draw();
+  });
+
 // Apply zoom to the canvas context
 ctx.scale(zoomFactor, zoomFactor);
 
-// Base class for all entities (player and enemies)
 class Entity {
   constructor(x, y, color) {
     this.x = x / zoomFactor;
     this.y = y / zoomFactor;
     this.color = color;
     this.radius = entitySize;
-    this.sortedEnemies = []; // Initialize the sorted list
+    this.sortedEnemies = [];
   }
 
-  // Method to update the sorted list of enemies
   updateSortedEnemies(enemies) {
     this.sortedEnemies = [...enemies].sort((a, b) => {
       const distA = calculateDistance(this.x, this.y, a.x, a.y);
@@ -122,7 +197,7 @@ class Entity {
 
 class Player extends Entity {
   constructor(x, y) {
-    super(x, y, "#61dafb"); // Light blue color
+    super(x, y, playerColor);
     this.speed = 5 / zoomFactor; // Adjust speed for zoom
   }
 
@@ -148,15 +223,13 @@ class Enemy extends Entity {
 
   draw(ctx) {
     // Determine the color based on hit status
-    if (this.isHit && this.aoeHit) {
-      this.color = mainBeamHitColor; // Green for main beam hit
-    } else if (this.aoeHit) {
-      this.color = aoeHitColor; // Purple for AoE hit
-    } else if (this.isHit) {
-      this.color = mainBeamHitColor; // Green for main beam hit
-    } else {
-      this.color = enemyColor; // Default enemy color
-    }
+    this.color = this.isHit
+      ? this.aoeHit
+        ? mainBeamHitColor
+        : mainBeamHitColor
+      : this.aoeHit
+      ? aoeHitColor
+      : enemyColor;
 
     // Draw the main circle
     super.draw(ctx);
@@ -212,14 +285,14 @@ class Chain {
     this.maxChains = maxChains;
     this.isMainBeam = isMainBeam;
     this.chainedEnemies = new Set([startEnemy]);
-    this.chainLinks = []; // Store the chain links
+    this.chainLinks = [];
     this.chainHits(startEnemy, maxChains);
   }
 
   chainHits(currentEnemy, remainingChains) {
     if (remainingChains <= 0) return;
 
-    currentEnemy.updateSortedEnemies(this.enemies); // Ensure sorted enemies are updated
+    currentEnemy.updateSortedEnemies(this.enemies);
 
     for (let enemy of currentEnemy.sortedEnemies) {
       if (this.chainedEnemies.has(enemy)) continue; // Skip already chained enemies
@@ -383,16 +456,12 @@ function draw() {
     beamEndY
   );
 
-  // Update current beam length
   currentBeamLength = calculateDistance(
     player.x,
     player.y,
     collisionResult.endX,
     collisionResult.endY
   );
-
-  // Define the beam color
-  const beamColor = "#ffffff";
 
   // Draw the line from the player to the calculated beam endpoint
   ctx.beginPath();

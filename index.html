@@ -33,7 +33,32 @@
             <button id="resetButton">Reset</button>
         </div>
         <div id="debug"></div>
-        <div id="infoPanel">Hold Left Mouse Button to toggle Primed Firestorm.</div>
+        <div class="legend">
+            <h3>Legend</h3>
+            <div class="legend-item">
+                <span id="enemyColor" class="legend-color"></span> Enemy
+                <input type="color" id="enemyColorPicker" class="color-picker">
+            </div>
+            <div class="legend-item">
+                <span id="beamHitColor" class="legend-color"></span> Beam Hit
+                <input type="color" id="beamHitColorPicker" class="color-picker">
+            </div>
+            <div class="legend-item">
+                <span id="aoeHitColor" class="legend-color"></span> AoE Hit
+                <input type="color" id="aoeHitColorPicker" class="color-picker">
+            </div>
+            <div class="legend-item">
+                <span id="beamColor" class="legend-color"></span> Beam
+                <input type="color" id="beamColorPicker" class="color-picker">
+            </div>
+            <div class="legend-item">
+                <span id="playerColor" class="legend-color"></span> Player
+                <input type="color" id="playerColorPicker" class="color-picker">
+            </div>
+        </div>
+        <div id="infoPanel">
+            Hold Left Mouse Button to toggle Primed Firestorm.
+        </div>
     </section>
     <script src="script.js"></script>
 </body>
