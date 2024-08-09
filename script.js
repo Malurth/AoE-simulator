@@ -43,10 +43,12 @@ const debugElement = document.getElementById("debug");
 const toggleCirclesCheckbox = document.getElementById("toggleCircles");
 const toggleBeamsCheckbox = document.getElementById("toggleBeams");
 const toggleEnemyMovementCheckbox = document.getElementById("toggleEnemyMovement");
+const toggleDamageNumbersCheckbox = document.getElementById("toggleDamageNumbers");
 
 let showCircles = toggleCirclesCheckbox.dataset.state;
 let showBeams = toggleBeamsCheckbox.checked;
 let enemyMovementEnabled = toggleEnemyMovementCheckbox.checked;
+let showDamageNumbers = toggleDamageNumbersCheckbox.checked;
 
 // Set initial background color based on the data-state attribute
 if (showCircles === "full") {
@@ -88,6 +90,11 @@ toggleBeamsCheckbox.addEventListener("change", () => {
   draw();
 });
 
+toggleDamageNumbersCheckbox.addEventListener("change", () => {
+  showDamageNumbers = toggleDamageNumbersCheckbox.checked;
+  draw();
+});
+
 resetButton.addEventListener("click", resetGame);
 
 beamLengthInput.addEventListener("input", () => {
@@ -124,6 +131,7 @@ document.getElementById("enemyCountValue").textContent = enemyCount;
 document.getElementById("toggleCircles").checked = showCircles;
 document.getElementById("toggleBeams").checked = showBeams;
 document.getElementById("toggleEnemyMovement").checked = enemyMovementEnabled;
+document.getElementById("toggleDamageNumbers").checked = showDamageNumbers;
 
 document.getElementById("enemySpeedInput").value = enemySpeed;
 document.getElementById("enemySpeedValue").textContent = enemySpeed;
@@ -317,12 +325,14 @@ class Enemy extends Entity {
     ctx.fillText(this.chains.length, this.x, this.y + this.radius / 2.8);
 
     // Calculate and draw the total damage percentage above the enemy
-    ctx.font = `0.3px Arial`;
-    const totalDamage = this.calculateTotalDamage();
-    ctx.strokeStyle = "#000000";
-    ctx.fillStyle = "#FFFFFF";
-    ctx.strokeText(`${totalDamage.toFixed(2)}%`, this.x, this.y - this.radius - 0.1);
-    ctx.fillText(`${totalDamage.toFixed(2)}%`, this.x, this.y - this.radius - 0.1);
+    if (showDamageNumbers) {
+      ctx.font = `0.3px Arial`;
+      const totalDamage = this.calculateTotalDamage();
+      ctx.strokeStyle = "#000000";
+      ctx.fillStyle = "#FFFFFF";
+      ctx.strokeText(`${totalDamage.toFixed(2)}%`, this.x, this.y - this.radius - 0.1);
+      ctx.fillText(`${totalDamage.toFixed(2)}%`, this.x, this.y - this.radius - 0.1);
+    }
   }
 
   drawHitRing(color, ctx) {
