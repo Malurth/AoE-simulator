@@ -202,10 +202,13 @@ class Entity {
   }
 
   draw(ctx) {
-    ctx.beginPath();
+    ctx.beginPath(); //outline
     ctx.fillStyle = this.color;
     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     ctx.fill();
+    ctx.lineWidth = 0.02;
+    ctx.strokeStyle = "#000000";
+    ctx.stroke();
   }
 
   updatePosition(dx, dy) {
