@@ -93,3 +93,26 @@ canvas {
   opacity: 0;
   pointer-events: none;
 }
+
+/* Hide the default checkbox */
+input[type="checkbox"] {
+  display: none;
+}
+
+/* Create a custom rectangular button */
+input[type="checkbox"] + label {
+  display: inline-block;
+  padding: 5px 10px;
+  background-color: red;
+  color: white;
+  text-align: center;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-left: 10px; /* Add some space between the label and the button */
+}
+
+/* Change background color when checked */
+input[type="checkbox"]:checked + label {
+  background-color: green;
+}
