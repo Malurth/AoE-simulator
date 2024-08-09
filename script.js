@@ -7,7 +7,7 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 // Zoom factor: Controls how much the canvas is zoomed in
-let zoomFactor = 20;
+let zoomFactor = 30;
 const startingEnemies = 25;
 const beamWidth = 0.2;
 const chainRadius = 6; // 6m chain radius
@@ -105,7 +105,7 @@ class Enemy extends Entity {
   }
 
   draw(ctx) {
-    this.color = this.aoeHit ? "#FF00FF" : this.isHit ? "#00ff00" : "#ff0000";
+    this.color = this.isHit ? "#00ff00" : this.aoeHit ? "#FF00FF" : "#ff0000";
     super.draw(ctx); // Draw the enemy as before
 
     if (this.isHit || this.aoeHit) {
@@ -186,7 +186,7 @@ class Chain {
 
   drawChainLinks(ctx) {
     ctx.strokeStyle = "rgba(255, 255, 255, 0.5)"; // White color with 50% opacity
-    ctx.lineWidth = 1 / zoomFactor; // Adjust line width
+    ctx.lineWidth = 0.2; // Adjust line width
     for (let link of this.chainLinks) {
       ctx.beginPath();
       ctx.moveTo(link.from.x, link.from.y);
@@ -202,8 +202,8 @@ const player = new Player(canvas.width / 2, canvas.height / 2);
 // Create enemies at random positions closer to the center
 const enemies = [];
 for (let i = 0; i < startingEnemies; i++) {
-  const x = Math.random() * (canvas.width / 2) + canvas.width / 4;
-  const y = Math.random() * (canvas.height / 2) + canvas.height / 4;
+  const x = Math.random() * canvas.width * 0.9;
+  const y = Math.random() * canvas.height * 0.9;
   enemies.push(new Enemy(x, y));
 }
 
@@ -221,7 +221,7 @@ function calculateDistance(x1, y1, x2, y2) {
 
 function checkBeamCollision(startX, startY, endX, endY) {
   let intersection = false;
-  let enemyHit = false; // Track if an enemy is hit by the main beam
+  let isEnemyHit = false; // Track if an enemy is hit by the main beam
 
   player.updateSortedEnemies(enemies);
 
@@ -240,13 +240,13 @@ function checkBeamCollision(startX, startY, endX, endY) {
     if (beamLength === 0) {
       const distance = calculateDistance(startX, startY, enemy.x, enemy.y);
       if (distance <= enemy.radius && !enemy.isHit) {
-        enemyHit = true; // Mark enemy as hit by the main beam
+        isEnemyHit = true; // Mark enemy as hit by the main beam
         enemy.hitWithTorid(true, enemies, ctx); // Chain hit to nearby enemies
         return {
           intersected: true,
           endX: enemy.x,
           endY: enemy.y,
-          enemyHit: enemyHit, // Return enemy hit status
+          enemyHit: enemy, // Return enemy hit status
         };
       }
       continue;
@@ -277,13 +277,13 @@ function checkBeamCollision(startX, startY, endX, endY) {
     );
 
     if (closestDistance <= enemy.radius) {
-      enemyHit = true; // Mark enemy as hit by the main beam
+      isEnemyHit = true; // Mark enemy as hit by the main beam
       enemy.hitWithTorid(true, enemies, ctx); // Chain hit to nearby enemies
       return {
         intersected: true,
         endX: closestX,
         endY: closestY,
-        enemyHit: enemyHit, // Return enemy hit status
+        enemyHit: enemy, // Return enemy hit status
       };
     }
   }
@@ -292,7 +292,7 @@ function checkBeamCollision(startX, startY, endX, endY) {
     intersected: intersection,
     endX,
     endY,
-    enemyHit: enemyHit, // Return enemy hit status
+    enemyHit: null, // Return enemy hit status
   };
 }
 
@@ -340,6 +340,15 @@ function draw() {
   // Draw the player
   player.draw(ctx);
 
+  // Variables to count hits
+  let mainBeamDirectHits = 0;
+  let totalMainBeamHits = 0;
+  let aoeDirectHits = 0;
+  let totalAoeHits = 0;
+
+  if (collisionResult.enemyHit) {
+    mainBeamDirectHits++;
+  }
   // Draw the 3m radius circle if LMB is held down or an enemy is hit
   if (isMouseDown || collisionResult.enemyHit) {
     ctx.beginPath();
@@ -362,18 +371,29 @@ function draw() {
 
     // Check for enemies within the smaller AoE
     for (let enemy of enemies) {
-      if (!enemy.isHit) {
-        // Ensure not already hit by the main beam
-        const distanceToAoE = calculateDistance(
-          collisionResult.endX,
-          collisionResult.endY,
-          enemy.x,
-          enemy.y
-        );
-        if (distanceToAoE <= toridBaseAoE) {
-          enemy.hitWithTorid(false, enemies, ctx);
-        }
+      // Exclude the enemy directly hit by the main beam
+      if (enemy === collisionResult.enemyHit) continue;
+
+      const distanceToAoE = calculateDistance(
+        collisionResult.endX,
+        collisionResult.endY,
+        enemy.x,
+        enemy.y
+      );
+      if (distanceToAoE <= toridBaseAoE) {
+        enemy.hitWithTorid(false, enemies, ctx);
+        aoeDirectHits++;
       }
+    }
+  }
+
+  // Count main beam hits
+  for (let enemy of enemies) {
+    if (enemy.isHit) {
+      totalMainBeamHits++;
+    }
+    if (enemy.aoeHit) {
+      totalAoeHits++;
     }
   }
 
@@ -390,6 +410,10 @@ function draw() {
       2
     )}, ${collisionResult.endY.toFixed(2)})<br>
     Collision Detected: ${collisionResult.intersected}<br>
+    Main Beam Hits (w/ chain): ${totalMainBeamHits}<br>
+    AoE Hits (w/ chains): ${totalAoeHits}<br>
+    Main Beam Direct Hits (w/ chain): ${mainBeamDirectHits}<br>
+    AoE Direct Hits: ${aoeDirectHits}<br>
   `;
 }
 
