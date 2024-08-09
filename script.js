@@ -284,7 +284,7 @@ class Enemy extends Entity {
     ctx.globalAlpha = aoeOpacity;
     ctx.beginPath();
     ctx.arc(this.x, this.y, 6, 0, Math.PI * 2);
-    ctx.strokeStyle = color;
+    ctx.strokeStyle = "#000000";
     ctx.lineWidth = 2 / zoomFactor;
     ctx.stroke();
 
@@ -376,10 +376,31 @@ class Chain {
   drawChainLinks(ctx) {
     if (!showBeams) return; // Skip drawing if beams are toggled off
 
-    this.isMainBeam ? (ctx.strokeStyle = mainBeamHitColor) : (ctx.strokeStyle = aoeHitColor);
     ctx.globalAlpha = 0.3;
-    ctx.lineWidth = 0.2;
+
     for (let link of this.chainLinks) {
+      // Draw the black outline first
+      ctx.strokeStyle = "#000000";
+      ctx.lineWidth = 0.25; // Slightly thicker to ensure the outline is visible
+      ctx.beginPath();
+      ctx.moveTo(link.from.x, link.from.y);
+      ctx.lineTo(link.to.x, link.to.y);
+      ctx.stroke();
+
+      // Set composite operation to 'destination-out' to cut out the inner part
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.lineWidth = 0.2; // Slightly thinner than the outline
+      ctx.beginPath();
+      ctx.moveTo(link.from.x, link.from.y);
+      ctx.lineTo(link.to.x, link.to.y);
+      ctx.stroke();
+
+      // Reset composite operation to default
+      ctx.globalCompositeOperation = "source-over";
+
+      // Draw the transparent colored line on top
+      this.isMainBeam ? (ctx.strokeStyle = mainBeamHitColor) : (ctx.strokeStyle = aoeHitColor);
+      ctx.lineWidth = 0.2;
       ctx.beginPath();
       ctx.moveTo(link.from.x, link.from.y);
       ctx.lineTo(link.to.x, link.to.y);
