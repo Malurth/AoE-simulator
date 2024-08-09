@@ -695,8 +695,9 @@ function update() {
 
 // Update mouse position and LMB state
 canvas.addEventListener("mousemove", (event) => {
-  mouseX = event.clientX / zoomFactor;
-  mouseY = event.clientY / zoomFactor;
+  const rect = canvas.getBoundingClientRect();
+  mouseX = (event.clientX - rect.left) / zoomFactor;
+  mouseY = (event.clientY - rect.top) / zoomFactor;
   draw();
 });
 
