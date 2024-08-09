@@ -1,6 +1,5 @@
-//TODO: visualize overlaps better
-//TODO: --needs better visualization of multiple aoe overlaps
-//TODO: enemy movement?
+//TODO: toggleable status chance display
+//TODO: toggleable multishot
 //TODO: general cleanup/refactor and un-GPT-ifying lol
 
 // Get the canvas element and context

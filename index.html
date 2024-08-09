@@ -10,7 +10,7 @@
 
 <body>
     <canvas id="demoCanvas"></canvas>
-    <section>
+    <section class="panelContainer" id="upperPanelContainer">
         <div id="controlPanel">
             <label for="beamLengthInput">Beam Length:</label>
             <input type="range" id="beamLengthInput" min="10" max="100" step="1">
@@ -40,6 +40,8 @@
             <button id="resetButton">Reset</button>
         </div>
         <div id="debug"></div>
+    </section>
+    <section class="panelContainer" id="lowerPanelContainer">
         <div class="legend">
             <h3>Legend</h3>
             <div class="legend-item">
