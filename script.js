@@ -1,3 +1,10 @@
+//TODO: visualize overlaps better
+//TODO: -- definitely the green/purple issue
+//TODO: toggleable chain range visualization
+//TODO: add reset/enemy num slider
+//TODO: enemy movement?
+//TODO: general cleanup/refactor and un-GPT-ifying lol
+
 // Get the canvas element and context
 const canvas = document.getElementById("demoCanvas");
 const ctx = canvas.getContext("2d");
@@ -6,27 +13,28 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-// Zoom factor: Controls how much the canvas is zoomed in
-let zoomFactor = 30;
-const startingEnemies = 25;
+const startingEnemies = 50;
 const beamWidth = 0.2;
+const entitySize = 0.4;
 const chainRadius = 6; // 6m chain radius
+
+const enemyColor = "#FF0000";
+const mainBeamHitColor = "#00FF00";
+const aoeHitColor = "#FF00FF";
+
+let zoomFactor = 25;
 let toridBaseAoE = 3;
 let aoeOpacity = 0.1;
 
 // Maximum beam length in pixels
 let baseBeamLength = 40; // Represents 40 meters
 let currentBeamLength = baseBeamLength; // Initialize current length with base length
-let primedFirestorm = false;
 
 // Control Panel
 const beamLengthInput = document.getElementById("beamLengthInput");
 const zoomFactorInput = document.getElementById("zoomFactorInput");
 const beamLengthValue = document.getElementById("beamLengthValue");
 const zoomFactorValue = document.getElementById("zoomFactorValue");
-const primedFirestormCheckbox = document.getElementById(
-  "primedFirestormCheckbox"
-);
 const debugElement = document.getElementById("debug");
 
 beamLengthInput.addEventListener("input", () => {
@@ -42,12 +50,6 @@ zoomFactorInput.addEventListener("input", () => {
   draw();
 });
 
-primedFirestormCheckbox.addEventListener("change", (event) => {
-  primedFirestorm = event.target.checked;
-  toridBaseAoE = primedFirestorm ? 4.32 : 3;
-  draw();
-});
-
 // Apply zoom to the canvas context
 ctx.scale(zoomFactor, zoomFactor);
 
@@ -57,7 +59,7 @@ class Entity {
     this.x = x / zoomFactor;
     this.y = y / zoomFactor;
     this.color = color;
-    this.radius = 0.5;
+    this.radius = entitySize;
     this.sortedEnemies = []; // Initialize the sorted list
   }
 
@@ -99,32 +101,37 @@ class Player extends Entity {
 
 class Enemy extends Entity {
   constructor(x, y) {
-    super(x, y, "#ff0000"); // Red color for enemies
+    super(x, y, enemyColor); // Red color for enemies
     this.isHit = false; // Initialize as not hit
     this.aoeHit = false;
   }
 
   draw(ctx) {
-    this.color = this.isHit ? "#00ff00" : this.aoeHit ? "#FF00FF" : "#ff0000";
+    this.color = this.isHit
+      ? mainBeamHitColor
+      : this.aoeHit
+      ? aoeHitColor
+      : enemyColor;
     super.draw(ctx); // Draw the enemy as before
 
-    if (this.isHit || this.aoeHit) {
-      this.drawHitRing(ctx); // Draw the ring if hit
+    if (this.isHit) {
+      this.drawHitRing(mainBeamHitColor, ctx); // Draw the ring if hit
+    }
+    if (this.aoeHit) {
+      this.drawHitRing(aoeHitColor, ctx); // Draw the ring if hit
     }
   }
 
-  drawHitRing(ctx) {
-    const hitRingColor = this.color; // Define the color for the hit ring
-
+  drawHitRing(color, ctx) {
+    ctx.globalAlpha = aoeOpacity; // Set transparency level (0.0 to 1.0)
     ctx.beginPath();
     ctx.arc(this.x, this.y, 6, 0, Math.PI * 2);
-    ctx.strokeStyle = hitRingColor; // Color of the ring
+    ctx.strokeStyle = color; // Color of the ring
     ctx.lineWidth = 2 / zoomFactor; // Adjust line width
     ctx.stroke();
 
     // Fill the circle with a transparent color
-    ctx.globalAlpha = aoeOpacity; // Set transparency level (0.0 to 1.0)
-    ctx.fillStyle = hitRingColor; // Use the same color as the ring
+    ctx.fillStyle = color; // Use the same color as the ring
     ctx.fill();
     ctx.globalAlpha = 1.0; // Reset transparency to default
   }
@@ -179,42 +186,41 @@ class Chain {
 
         // Chain to the next enemy
         this.chainHits(enemy, remainingChains - 1);
-        break; // Ensure linear chaining by breaking after the first valid chain
+        break;
       }
     }
   }
 
   drawChainLinks(ctx) {
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.5)"; // White color with 50% opacity
-    ctx.lineWidth = 0.2; // Adjust line width
+    this.isMainBeam
+      ? (ctx.strokeStyle = mainBeamHitColor)
+      : (ctx.strokeStyle = aoeHitColor);
+    ctx.globalAlpha = 0.3;
+    ctx.lineWidth = 0.2;
     for (let link of this.chainLinks) {
       ctx.beginPath();
       ctx.moveTo(link.from.x, link.from.y);
       ctx.lineTo(link.to.x, link.to.y);
       ctx.stroke();
     }
+    ctx.globalAlpha = 1.0;
   }
 }
 
 // Create a player at the center of the screen
 const player = new Player(canvas.width / 2, canvas.height / 2);
 
-// Create enemies at random positions closer to the center
+// Create enemies at random positions
 const enemies = [];
 for (let i = 0; i < startingEnemies; i++) {
-  const x = Math.random() * canvas.width * 0.9;
-  const y = Math.random() * canvas.height * 0.9;
+  const x = (Math.random() * 0.8 + 0.1) * canvas.width;
+  const y = (Math.random() * 0.8 + 0.1) * canvas.height;
   enemies.push(new Enemy(x, y));
 }
 
-// Variables to store mouse position
 let mouseX = canvas.width / 2 / zoomFactor;
 let mouseY = canvas.height / 2 / zoomFactor;
 
-// Flag to track LMB state
-let isMouseDown = false;
-
-// Calculate the distance between two points
 function calculateDistance(x1, y1, x2, y2) {
   return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
 }
@@ -350,40 +356,38 @@ function draw() {
     mainBeamDirectHits++;
   }
   // Draw the 3m radius circle if LMB is held down or an enemy is hit
-  if (isMouseDown || collisionResult.enemyHit) {
-    ctx.beginPath();
-    ctx.arc(
+  ctx.beginPath();
+  ctx.arc(
+    collisionResult.endX,
+    collisionResult.endY,
+    toridBaseAoE,
+    0,
+    Math.PI * 2
+  );
+  ctx.strokeStyle = beamColor; // Color of the circle
+  ctx.lineWidth = 1 / zoomFactor; // Adjust line width
+  ctx.stroke();
+
+  // Fill the circle with a transparent color
+  ctx.globalAlpha = aoeOpacity; // Set transparency level (0.0 to 1.0)
+  ctx.fillStyle = beamColor; // Use the same color as the beam
+  ctx.fill();
+  ctx.globalAlpha = 1.0; // Reset transparency to default
+
+  // Check for enemies within the smaller AoE
+  for (let enemy of enemies) {
+    // Exclude the enemy directly hit by the main beam
+    if (enemy === collisionResult.enemyHit) continue;
+
+    const distanceToAoE = calculateDistance(
       collisionResult.endX,
       collisionResult.endY,
-      toridBaseAoE,
-      0,
-      Math.PI * 2
+      enemy.x,
+      enemy.y
     );
-    ctx.strokeStyle = beamColor; // Color of the circle
-    ctx.lineWidth = 1 / zoomFactor; // Adjust line width
-    ctx.stroke();
-
-    // Fill the circle with a transparent color
-    ctx.globalAlpha = aoeOpacity; // Set transparency level (0.0 to 1.0)
-    ctx.fillStyle = beamColor; // Use the same color as the beam
-    ctx.fill();
-    ctx.globalAlpha = 1.0; // Reset transparency to default
-
-    // Check for enemies within the smaller AoE
-    for (let enemy of enemies) {
-      // Exclude the enemy directly hit by the main beam
-      if (enemy === collisionResult.enemyHit) continue;
-
-      const distanceToAoE = calculateDistance(
-        collisionResult.endX,
-        collisionResult.endY,
-        enemy.x,
-        enemy.y
-      );
-      if (distanceToAoE <= toridBaseAoE) {
-        enemy.hitWithTorid(false, enemies, ctx);
-        aoeDirectHits++;
-      }
+    if (distanceToAoE <= toridBaseAoE) {
+      enemy.hitWithTorid(false, enemies, ctx);
+      aoeDirectHits++;
     }
   }
 
@@ -465,16 +469,14 @@ canvas.addEventListener("mousemove", (event) => {
 
 canvas.addEventListener("mousedown", (event) => {
   if (event.button === 0) {
-    // Left mouse button
-    isMouseDown = true;
+    toridBaseAoE = 4.32; // primed firestorm
     draw();
   }
 });
 
 canvas.addEventListener("mouseup", (event) => {
   if (event.button === 0) {
-    // Left mouse button
-    isMouseDown = false;
+    toridBaseAoE = 3; // regular
     draw();
   }
 });
