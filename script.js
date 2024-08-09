@@ -255,6 +255,7 @@ class Enemy extends Entity {
     super(x, y, enemyColor); // Red color for enemies
     this.isHit = false; // Initialize as not hit
     this.aoeHit = false;
+    this.isPrimaryTarget = false;
     this.velocityX = ((Math.random() - 0.5) * enemySpeed) / zoomFactor; // Random initial velocity
     this.velocityY = ((Math.random() - 0.5) * enemySpeed) / zoomFactor; // Random initial velocity
     this.initialDirection = { x: this.velocityX, y: this.velocityY }; // Store initial direction
@@ -267,6 +268,20 @@ class Enemy extends Entity {
 
   clearChainInfo() {
     this.chains = [];
+  }
+
+  calculateTotalDamage() {
+    let totalDamage = 0;
+
+    if (this.isPrimaryTarget) {
+      totalDamage += 100;
+    }
+
+    this.chains.forEach(({ depth }) => {
+      totalDamage += 100 * Math.pow(0.75, depth);
+    });
+
+    return totalDamage;
   }
 
   draw(ctx) {
@@ -295,9 +310,20 @@ class Enemy extends Entity {
 
     // Draw the number of chains above the enemy in bold
     ctx.font = `bold 0.4px Arial`;
-    ctx.fillStyle = "#000000";
     ctx.textAlign = "center";
+
+    // Draw the text with a thin white outline
+    ctx.lineWidth = 0.05;
+    ctx.fillStyle = "#000000";
     ctx.fillText(this.chains.length, this.x, this.y + this.radius / 2.8);
+
+    // Calculate and draw the total damage percentage above the enemy
+    ctx.font = `0.3px Arial`;
+    const totalDamage = this.calculateTotalDamage();
+    ctx.strokeStyle = "#000000";
+    ctx.fillStyle = "#FFFFFF";
+    ctx.strokeText(`${totalDamage.toFixed(2)}%`, this.x, this.y - this.radius - 0.1);
+    ctx.fillText(`${totalDamage.toFixed(2)}%`, this.x, this.y - this.radius - 0.1);
   }
 
   drawHitRing(color, ctx) {
@@ -319,6 +345,7 @@ class Enemy extends Entity {
     } else {
       this.aoeHit = true;
     }
+    this.isPrimaryTarget = true;
     this.updateSortedEnemies(enemies);
     const chain = new Chain(this, this.sortedEnemies, 5, isMainBeam);
     chain.drawChainLinks(ctx);
@@ -458,6 +485,7 @@ function checkBeamCollision(startX, startY, endX, endY) {
   for (let enemy of player.sortedEnemies) {
     enemy.isHit = false;
     enemy.aoeHit = false;
+    enemy.isPrimaryTarget = false;
     enemy.clearChainInfo(); // Clear previous chain info
   }
 
