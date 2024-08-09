@@ -412,10 +412,10 @@ class Enemy extends Entity {
       ctx.strokeText(`${totalDamage.toFixed(2)}%`, this.x, this.y - this.radius - 0.1);
       ctx.fillText(`${totalDamage.toFixed(2)}%`, this.x, this.y - this.radius - 0.1);
       if (mainBeamDamage > 0 && aoeDamage > 0) {
-        ctx.fillStyle = "#00FF00";
+        ctx.fillStyle = mainBeamHitColor;
         ctx.strokeText(`${mainBeamDamage.toFixed(2)}%`, this.x, this.y - this.radius + 1.1);
         ctx.fillText(`${mainBeamDamage.toFixed(2)}%`, this.x, this.y - this.radius + 1.1);
-        ctx.fillStyle = "#FF00FF";
+        ctx.fillStyle = aoeHitColor;
         ctx.strokeText(`${aoeDamage.toFixed(2)}%`, this.x, this.y - this.radius + 1.5);
         ctx.fillText(`${aoeDamage.toFixed(2)}%`, this.x, this.y - this.radius + 1.5);
       }
