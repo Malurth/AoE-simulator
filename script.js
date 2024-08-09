@@ -578,6 +578,12 @@ function update() {
     dx = player.speed;
   }
 
+  // Normalize diagonal movement because I'll be GODDAMNED if I'm gonna let anyone go faster by moving diagonally
+  if (dx !== 0 && dy !== 0) {
+    dx *= Math.SQRT1_2;
+    dy *= Math.SQRT1_2;
+  }
+
   // Update player position based on keys pressed
   player.updatePosition(dx, dy);
 
