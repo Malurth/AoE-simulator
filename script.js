@@ -13,7 +13,6 @@ canvas.height = window.innerHeight;
 
 const beamWidth = 0.2;
 const entitySize = 0.4;
-const chainRadius = 6;
 const playerSpeed = 5;
 
 let enemyColor = "#FF0000";
@@ -29,6 +28,8 @@ let zoomFactor = 50;
 let toridBaseAoE = 3;
 let aoeOpacity = 0.05;
 let baseBeamLength = 40;
+let maxChainDepth = 5;
+let chainRadius = 6;
 let currentBeamLength = baseBeamLength;
 
 // #region Control Panel
@@ -36,10 +37,14 @@ const beamLengthInput = document.getElementById("beamLengthInput");
 const zoomFactorInput = document.getElementById("zoomFactorInput");
 const enemyCountInput = document.getElementById("enemyCountInput");
 const enemySpeedInput = document.getElementById("enemySpeedInput");
+const maxChainDepthInput = document.getElementById("maxChainDepthInput");
+const chainRadiusInput = document.getElementById("chainRadiusInput");
 const beamLengthValue = document.getElementById("beamLengthValue");
 const zoomFactorValue = document.getElementById("zoomFactorValue");
 const enemyCountValue = document.getElementById("enemyCountValue");
 const enemySpeedValue = document.getElementById("enemySpeedValue");
+const maxChainDepthValue = document.getElementById("maxChainDepthValue");
+const chainRadiusValue = document.getElementById("chainRadiusValue");
 const resetButton = document.getElementById("resetButton");
 const debugElement = document.getElementById("debug");
 const toggleCirclesCheckbox = document.getElementById("toggleCircles");
@@ -97,11 +102,23 @@ toggleDamageNumbersCheckbox.addEventListener("change", () => {
   draw();
 });
 
-resetButton.addEventListener("click", resetGame);
+resetButton.addEventListener("click", resetToridVariables);
 
 beamLengthInput.addEventListener("input", () => {
   baseBeamLength = parseFloat(beamLengthInput.value);
   beamLengthValue.textContent = baseBeamLength;
+  draw();
+});
+
+maxChainDepthInput.addEventListener("input", () => {
+  maxChainDepth = parseFloat(maxChainDepthInput.value);
+  maxChainDepthValue.textContent = maxChainDepth;
+  draw();
+});
+
+chainRadiusInput.addEventListener("input", () => {
+  chainRadius = parseFloat(chainRadiusInput.value);
+  chainRadiusValue.textContent = chainRadius;
   draw();
 });
 
@@ -129,6 +146,12 @@ document.getElementById("zoomFactorValue").textContent = zoomFactor;
 
 document.getElementById("enemyCountInput").value = enemyCount;
 document.getElementById("enemyCountValue").textContent = enemyCount;
+
+document.getElementById("maxChainDepthInput").value = maxChainDepth;
+document.getElementById("maxChainDepthValue").textContent = maxChainDepth;
+
+document.getElementById("chainRadiusInput").value = chainRadius;
+document.getElementById("chainRadiusValue").textContent = chainRadius;
 
 document.getElementById("toggleCircles").checked = showCircles;
 document.getElementById("toggleBeams").checked = showBeams;
@@ -370,7 +393,7 @@ class Enemy extends Entity {
   drawHitRing(color, ctx) {
     ctx.globalAlpha = aoeOpacity;
     ctx.beginPath();
-    ctx.arc(this.x, this.y, 6, 0, Math.PI * 2);
+    ctx.arc(this.x, this.y, chainRadius, 0, Math.PI * 2);
     ctx.strokeStyle = "#000000";
     ctx.lineWidth = 2 / zoomFactor;
     ctx.stroke();
@@ -389,7 +412,7 @@ class Enemy extends Entity {
       this.isPrimaryAoETarget = true;
     }
     this.updateSortedEnemies(enemies);
-    const chain = new Chain(this, this.sortedEnemies, 5, isMainBeam);
+    const chain = new Chain(this, this.sortedEnemies, maxChainDepth, isMainBeam);
     chain.drawChainLinks(ctx);
   }
 
@@ -754,6 +777,21 @@ canvas.addEventListener("mouseup", (event) => {
     draw();
   }
 });
+
+function resetToridVariables() {
+  maxChainDepth = 5;
+  chainRadius = 6;
+  beamLength = 40;
+  //update the values on the screen
+  document.getElementById("maxChainDepthValue").textContent = maxChainDepth;
+  document.getElementById("chainRadiusValue").textContent = chainRadius;
+  document.getElementById("beamLengthValue").textContent = beamLength;
+  //update the values in the sliders
+  document.getElementById("maxChainDepthInput").value = maxChainDepth;
+  document.getElementById("chainRadiusInput").value = chainRadius;
+  document.getElementById("beamLengthInput").value = beamLength;
+  //man I should go back to svelte lmao this is ass
+}
 
 function resetGame() {
   // Reset player position to the center of the screen
