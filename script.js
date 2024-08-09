@@ -537,7 +537,7 @@ function draw() {
     Collision Detected: ${collisionResult.intersected}<br>
     Main Beam Hits (w/ chain): ${totalMainBeamHits}<br>
     AoE Hits (w/ chains): ${totalAoeHits}<br>
-    Main Beam Direct Hits (w/ chain): ${mainBeamDirectHits}<br>
+    Main Beam Direct Hits: ${mainBeamDirectHits}<br>
     AoE Direct Hits: ${aoeDirectHits}<br>
   `;
 }
