@@ -8,8 +8,9 @@ canvas.height = window.innerHeight;
 
 // Zoom factor: Controls how much the canvas is zoomed in
 let zoomFactor = 20;
-const startingEnemies = 20;
+const startingEnemies = 25;
 const beamWidth = 0.2;
+const chainRadius = 6; // 6m chain radius
 let toridBaseAoE = 3;
 let aoeOpacity = 0.1;
 
@@ -77,15 +78,6 @@ class Entity {
   }
 }
 
-// In the Player class or anywhere where the enemies are available
-function updateEntities() {
-  enemies.forEach((enemy) => {
-    enemy.updateSortedEnemies(enemies);
-  });
-  player.updateSortedEnemies(enemies);
-}
-
-// Player class, inherits from Entity
 class Player extends Entity {
   constructor(x, y) {
     super(x, y, "#61dafb"); // Light blue color
@@ -105,7 +97,6 @@ class Player extends Entity {
   }
 }
 
-// Enemy class, inherits from Entity
 class Enemy extends Entity {
   constructor(x, y) {
     super(x, y, "#ff0000"); // Red color for enemies
@@ -137,6 +128,72 @@ class Enemy extends Entity {
     ctx.fill();
     ctx.globalAlpha = 1.0; // Reset transparency to default
   }
+
+  hitWithTorid(isMainBeam, enemies, ctx) {
+    if (isMainBeam) {
+      this.isHit = true;
+    } else {
+      this.aoeHit = true;
+    }
+    this.updateSortedEnemies(enemies);
+    const chain = new Chain(this, this.sortedEnemies, 5, isMainBeam);
+    chain.drawChainLinks(ctx); // Draw the chain links
+  }
+}
+
+class Chain {
+  constructor(startEnemy, enemies, maxChains, isMainBeam) {
+    this.startEnemy = startEnemy;
+    this.enemies = enemies;
+    this.maxChains = maxChains;
+    this.isMainBeam = isMainBeam;
+    this.chainedEnemies = new Set([startEnemy]);
+    this.chainLinks = []; // Store the chain links
+    this.chainHits(startEnemy, maxChains);
+  }
+
+  chainHits(currentEnemy, remainingChains) {
+    if (remainingChains <= 0) return;
+
+    currentEnemy.updateSortedEnemies(this.enemies); // Ensure sorted enemies are updated
+
+    for (let enemy of currentEnemy.sortedEnemies) {
+      if (this.chainedEnemies.has(enemy)) continue; // Skip already chained enemies
+
+      const distance = calculateDistance(
+        currentEnemy.x,
+        currentEnemy.y,
+        enemy.x,
+        enemy.y
+      );
+
+      if (distance <= chainRadius) {
+        this.chainedEnemies.add(enemy);
+        this.chainLinks.push({ from: currentEnemy, to: enemy }); // Add the link
+
+        if (this.isMainBeam) {
+          enemy.isHit = true;
+        } else {
+          enemy.aoeHit = true;
+        }
+
+        // Chain to the next enemy
+        this.chainHits(enemy, remainingChains - 1);
+        break; // Ensure linear chaining by breaking after the first valid chain
+      }
+    }
+  }
+
+  drawChainLinks(ctx) {
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.5)"; // White color with 50% opacity
+    ctx.lineWidth = 1 / zoomFactor; // Adjust line width
+    for (let link of this.chainLinks) {
+      ctx.beginPath();
+      ctx.moveTo(link.from.x, link.from.y);
+      ctx.lineTo(link.to.x, link.to.y);
+      ctx.stroke();
+    }
+  }
 }
 
 // Create a player at the center of the screen
@@ -163,7 +220,6 @@ function calculateDistance(x1, y1, x2, y2) {
 }
 
 function checkBeamCollision(startX, startY, endX, endY) {
-  let closestPoint = { x: endX, y: endY };
   let intersection = false;
   let enemyHit = false; // Track if an enemy is hit by the main beam
 
@@ -184,8 +240,8 @@ function checkBeamCollision(startX, startY, endX, endY) {
     if (beamLength === 0) {
       const distance = calculateDistance(startX, startY, enemy.x, enemy.y);
       if (distance <= enemy.radius && !enemy.isHit) {
-        enemy.isHit = true;
         enemyHit = true; // Mark enemy as hit by the main beam
+        enemy.hitWithTorid(true, enemies, ctx); // Chain hit to nearby enemies
         return {
           intersected: true,
           endX: enemy.x,
@@ -221,8 +277,8 @@ function checkBeamCollision(startX, startY, endX, endY) {
     );
 
     if (closestDistance <= enemy.radius) {
-      enemy.isHit = true;
       enemyHit = true; // Mark enemy as hit by the main beam
+      enemy.hitWithTorid(true, enemies, ctx); // Chain hit to nearby enemies
       return {
         intersected: true,
         endX: closestX,
@@ -315,8 +371,7 @@ function draw() {
           enemy.y
         );
         if (distanceToAoE <= toridBaseAoE) {
-          // 3m AoE radius
-          enemy.aoeHit = true;
+          enemy.hitWithTorid(false, enemies, ctx);
         }
       }
     }
