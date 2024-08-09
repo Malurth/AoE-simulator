@@ -26,7 +26,7 @@ let playerColor = "#61dafb";
 let enemyCount = 50;
 let zoomFactor = 30;
 let toridBaseAoE = 3;
-let aoeOpacity = 0.1;
+let aoeOpacity = 0.05;
 let baseBeamLength = 40;
 let currentBeamLength = baseBeamLength;
 
@@ -340,6 +340,7 @@ class Chain {
           enemy.isHit = true;
         } else {
           enemy.aoeHit = true;
+          enemy.drawHitRing(aoeHitColor, ctx); //there can be multiple AoE chains, stacking transparent circles makes it easier to visualize effect
         }
 
         // Chain to the next enemy
