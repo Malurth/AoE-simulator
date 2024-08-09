@@ -1,7 +1,4 @@
 //TODO: visualize overlaps better
-//TODO: -- definitely the green/purple issue
-//TODO: toggleable chain range visualization
-//TODO: add reset/enemy num slider
 //TODO: enemy movement?
 //TODO: general cleanup/refactor and un-GPT-ifying lol
 
@@ -79,6 +76,19 @@ enemyCountInput.addEventListener("input", () => {
   resetGame();
   draw();
 });
+
+// Initialize control panel values
+document.getElementById("beamLengthInput").value = baseBeamLength;
+document.getElementById("beamLengthValue").textContent = baseBeamLength;
+
+document.getElementById("zoomFactorInput").value = zoomFactor;
+document.getElementById("zoomFactorValue").textContent = zoomFactor;
+
+document.getElementById("enemyCountInput").value = enemyCount;
+document.getElementById("enemyCountValue").textContent = enemyCount;
+
+document.getElementById("toggleCircles").checked = showCircles;
+document.getElementById("toggleBeams").checked = showBeams;
 
 // Apply zoom to the canvas context
 ctx.scale(zoomFactor, zoomFactor);
