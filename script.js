@@ -1,5 +1,6 @@
 //TODO: toggleable status chance display
 //TODO: toggleable multishot
+//TODO: cool little ui popup or tooltip or something explaining features
 //TODO: general cleanup/refactor and un-GPT-ifying lol
 
 // Get the canvas element and context
@@ -14,7 +15,6 @@ const beamWidth = 0.2;
 const entitySize = 0.4;
 const chainRadius = 6;
 const playerSpeed = 5;
-let enemySpeed = 1;
 
 let enemyColor = "#FF0000";
 let mainBeamHitColor = "#00FF00";
@@ -22,6 +22,8 @@ let aoeHitColor = "#FF00FF";
 let beamColor = "#FFFFFF";
 let playerColor = "#61dafb";
 
+let multishot = 3;
+let enemySpeed = 1;
 let enemyCount = 50;
 let zoomFactor = 50;
 let toridBaseAoE = 3;
@@ -262,7 +264,8 @@ class Enemy extends Entity {
     super(x, y, enemyColor); // Red color for enemies
     this.isHit = false; // Initialize as not hit
     this.aoeHit = false;
-    this.isPrimaryTarget = false;
+    this.isPrimaryMainBeamTarget = false;
+    this.isPrimaryAoETarget = false;
     this.velocityX = ((Math.random() - 0.5) * enemySpeed) / zoomFactor; // Random initial velocity
     this.velocityY = ((Math.random() - 0.5) * enemySpeed) / zoomFactor; // Random initial velocity
     this.initialDirection = { x: this.velocityX, y: this.velocityY }; // Store initial direction
@@ -278,17 +281,38 @@ class Enemy extends Entity {
   }
 
   calculateTotalDamage() {
-    let totalDamage = 0;
+    let totalMainBeamDamage = 0;
+    let totalAoeDamage = 0;
 
-    if (this.isPrimaryTarget) {
-      totalDamage += 100;
+    // Calculate main beam damage
+    if (this.isPrimaryMainBeamTarget) {
+      totalMainBeamDamage += 100 * multishot;
     }
 
-    this.chains.forEach(({ depth }) => {
-      totalDamage += 100 * Math.pow(0.75, depth);
-    });
+    let mainBeamChainDepth = this.chains.filter((c) => c.chain.isMainBeam).reduce((min, c) => Math.min(min, c.depth), Infinity);
+    if (mainBeamChainDepth !== Infinity) {
+      totalMainBeamDamage += 100 * Math.pow(0.75, mainBeamChainDepth) * multishot;
+    }
 
-    return totalDamage;
+    // Calculate AoE damage
+    if (this.isPrimaryAoETarget) {
+      totalAoeDamage += 100;
+    }
+
+    // Sum up all AoE chain damages
+    this.chains
+      .filter((c) => !c.chain.isMainBeam)
+      .forEach((c) => {
+        totalAoeDamage += 100 * Math.pow(0.75, c.depth);
+      });
+
+    let totalDamage = totalMainBeamDamage + totalAoeDamage;
+
+    return {
+      totalDamage,
+      mainBeamDamage: totalMainBeamDamage,
+      aoeDamage: totalAoeDamage,
+    };
   }
 
   draw(ctx) {
@@ -327,11 +351,19 @@ class Enemy extends Entity {
     // Calculate and draw the total damage percentage above the enemy
     if (showDamageNumbers) {
       ctx.font = `0.3px Arial`;
-      const totalDamage = this.calculateTotalDamage();
+      const { totalDamage, mainBeamDamage, aoeDamage } = this.calculateTotalDamage();
       ctx.strokeStyle = "#000000";
       ctx.fillStyle = "#FFFFFF";
       ctx.strokeText(`${totalDamage.toFixed(2)}%`, this.x, this.y - this.radius - 0.1);
       ctx.fillText(`${totalDamage.toFixed(2)}%`, this.x, this.y - this.radius - 0.1);
+      if (mainBeamDamage > 0 && aoeDamage > 0) {
+        ctx.fillStyle = "#00FF00";
+        ctx.strokeText(`${mainBeamDamage.toFixed(2)}%`, this.x, this.y - this.radius + 1.1);
+        ctx.fillText(`${mainBeamDamage.toFixed(2)}%`, this.x, this.y - this.radius + 1.1);
+        ctx.fillStyle = "#FF00FF";
+        ctx.strokeText(`${aoeDamage.toFixed(2)}%`, this.x, this.y - this.radius + 1.5);
+        ctx.fillText(`${aoeDamage.toFixed(2)}%`, this.x, this.y - this.radius + 1.5);
+      }
     }
   }
 
@@ -351,10 +383,11 @@ class Enemy extends Entity {
   hitWithTorid(isMainBeam, enemies, ctx) {
     if (isMainBeam) {
       this.isHit = true;
+      this.isPrimaryMainBeamTarget = true;
     } else {
       this.aoeHit = true;
+      this.isPrimaryAoETarget = true;
     }
-    this.isPrimaryTarget = true;
     this.updateSortedEnemies(enemies);
     const chain = new Chain(this, this.sortedEnemies, 5, isMainBeam);
     chain.drawChainLinks(ctx);
@@ -486,7 +519,6 @@ function calculateDistance(x1, y1, x2, y2) {
 
 function checkBeamCollision(startX, startY, endX, endY) {
   let intersection = false;
-  let isEnemyHit = false; // Track if an enemy is hit by the main beam
 
   player.updateSortedEnemies(enemies);
 
@@ -507,7 +539,6 @@ function checkBeamCollision(startX, startY, endX, endY) {
     if (beamLength === 0) {
       const distance = calculateDistance(startX, startY, enemy.x, enemy.y);
       if (distance <= enemy.radius && !enemy.isHit) {
-        isEnemyHit = true; // Mark enemy as hit by the main beam
         enemy.hitWithTorid(true, enemies, ctx); // Chain hit to nearby enemies
         return {
           intersected: true,
@@ -558,6 +589,15 @@ function checkBeamCollision(startX, startY, endX, endY) {
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width / zoomFactor, canvas.height / zoomFactor);
+
+  // Reset hit status and chain information for all enemies
+  for (let enemy of enemies) {
+    enemy.isHit = false;
+    enemy.aoeHit = false;
+    enemy.isPrimaryMainBeamTarget = false;
+    enemy.isPrimaryAoETarget = false;
+    enemy.clearChainInfo();
+  }
 
   const distance = calculateDistance(player.x, player.y, mouseX, mouseY);
 
