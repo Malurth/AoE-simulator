@@ -213,10 +213,10 @@ class Entity {
     this.y += dy;
 
     // Ensure the entity stays within the canvas boundaries
-    if (this.x < 0) this.x = 0;
-    if (this.x > canvas.width / zoomFactor) this.x = canvas.width / zoomFactor;
-    if (this.y < 0) this.y = 0;
-    if (this.y > canvas.height / zoomFactor) this.y = canvas.height / zoomFactor;
+    if (this.x < this.radius) this.x = this.radius;
+    if (this.x > canvas.width / zoomFactor - this.radius) this.x = canvas.width / zoomFactor - this.radius;
+    if (this.y < this.radius) this.y = this.radius;
+    if (this.y > canvas.height / zoomFactor - this.radius) this.y = canvas.height / zoomFactor - this.radius;
   }
 }
 
@@ -299,11 +299,11 @@ class Enemy extends Entity {
       super.updatePosition(this.velocityX, this.velocityY);
 
       // Bounce off the edges
-      if (this.x <= 0 || this.x >= canvas.width / zoomFactor) {
+      if (this.x <= this.radius || this.x >= canvas.width / zoomFactor - this.radius) {
         this.velocityX = -this.velocityX;
         this.initialDirection.x = -this.initialDirection.x; // Update initial direction
       }
-      if (this.y <= 0 || this.y >= canvas.height / zoomFactor) {
+      if (this.y <= this.radius || this.y >= canvas.height / zoomFactor - this.radius) {
         this.velocityY = -this.velocityY;
         this.initialDirection.y = -this.initialDirection.y; // Update initial direction
       }
