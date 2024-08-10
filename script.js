@@ -1,7 +1,9 @@
-//TODO: toggleable status chance display
-//TODO: toggleable multishot
+//TODO: fix UI so it works well with any dimension window
 //TODO: cool little ui popup or tooltip or something explaining features
 //TODO: general cleanup/refactor and un-GPT-ifying lol
+//TODO: improve/implement enemy size controls
+//TODO: enemy spawn controls?
+//TODO: expand scope to saryn spore/miasma simulation?
 
 // Get the canvas element and context
 const canvas = document.getElementById("demoCanvas");
@@ -12,7 +14,7 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 const beamWidth = 0.2;
-const entitySize = 0.4;
+const entitySize = 0.5;
 const playerSpeed = 5;
 
 let enemyColor = "#FF0000";
@@ -420,21 +422,23 @@ class Enemy extends Entity {
     // Draw the text with a thin white outline
     ctx.lineWidth = 0.05;
     ctx.fillStyle = "#000000";
-    ctx.fillText(this.chains.length, this.x, this.y + this.radius / 2.8);
+    ctx.fillText(this.chains.length, this.x, this.y + 0.15);
 
     // Calculate and draw the total damage percentage and status chance above the enemy
     if (showDamageNumbers || showStatusChance) {
-      ctx.font = `0.3px Arial`;
+      let partialScaleFactor = 1 + Math.log(100 / zoomFactor);
+      let fontSize = 0.3 * partialScaleFactor;
+      ctx.font = `${fontSize}px Arial`;
       const { totalDamage, mainBeamDamage, aoeDamage, statusChance } = this.calculateTotalDamageAndStatus();
       ctx.strokeStyle = "#000000";
       ctx.fillStyle = "#FFFFFF";
 
-      let yOffset = -this.radius - 0.1;
+      let yOffset = -this.radius - 0.1 * partialScaleFactor;
 
       if (showDamageNumbers && totalDamage > 0) {
         ctx.strokeText(`${totalDamage.toFixed(2)}%`, this.x, this.y + yOffset);
         ctx.fillText(`${totalDamage.toFixed(2)}%`, this.x, this.y + yOffset);
-        yOffset -= 0.4;
+        yOffset -= 0.3 * partialScaleFactor;
       }
 
       if (showStatusChance && statusChance > 0) {
@@ -444,12 +448,12 @@ class Enemy extends Entity {
       }
 
       if (showDamageNumbers && mainBeamDamage > 0 && aoeDamage > 0) {
-        yOffset = this.radius + 0.3; // Reset yOffset for beam and AoE damage
+        yOffset = this.radius + 0.3 * partialScaleFactor; // Reset yOffset for beam and AoE damage
 
         ctx.fillStyle = mainBeamHitColor;
         ctx.strokeText(`${mainBeamDamage.toFixed(2)}%`, this.x, this.y + yOffset);
         ctx.fillText(`${mainBeamDamage.toFixed(2)}%`, this.x, this.y + yOffset);
-        yOffset += 0.4;
+        yOffset += 0.3 * partialScaleFactor;
 
         ctx.fillStyle = aoeHitColor;
         ctx.strokeText(`${aoeDamage.toFixed(2)}%`, this.x, this.y + yOffset);
