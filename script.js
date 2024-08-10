@@ -893,3 +893,12 @@ function updateEnemyVelocities() {
 // Initial draw and start the update loop
 draw();
 update();
+
+window.addEventListener("resize", handleResize);
+
+function handleResize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  ctx.scale(zoomFactor, zoomFactor);
+  resetGame();
+}

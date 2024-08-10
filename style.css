@@ -186,3 +186,9 @@ input[type="checkbox"]:checked + label {
 input[type="text"] {
   width: 30px;
 }
+
+@media (max-width: 768px) {
+  #top-container {
+    flex-direction: column;
+  }
+}
