@@ -17,7 +17,6 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 const beamWidth = 0.2;
-const entitySize = 0.5;
 const playerSpeed = 5;
 
 let enemyColor = "#FF0000";
@@ -28,6 +27,7 @@ let playerColor = "#61dafb";
 
 let multishot = 300;
 let enemySpeed = 1;
+let entitySize = 0.5;
 let zoomFactor = isSmallScreen() ? 30 : 50;
 let enemyCount = isSmallScreen() ? 25 : 50;
 let toridBaseAoE = 3;
@@ -44,12 +44,14 @@ const enemyCountInput = document.getElementById("enemyCountInput");
 const enemySpeedInput = document.getElementById("enemySpeedInput");
 const maxChainDepthInput = document.getElementById("maxChainDepthInput");
 const chainRadiusInput = document.getElementById("chainRadiusInput");
+const entitySizeInput = document.getElementById("entitySizeInput");
 const beamLengthValue = document.getElementById("beamLengthValue");
 const zoomFactorValue = document.getElementById("zoomFactorValue");
 const enemyCountValue = document.getElementById("enemyCountValue");
 const enemySpeedValue = document.getElementById("enemySpeedValue");
 const maxChainDepthValue = document.getElementById("maxChainDepthValue");
 const chainRadiusValue = document.getElementById("chainRadiusValue");
+const entitySizeValue = document.getElementById("entitySizeValue");
 const resetButton = document.getElementById("resetButton");
 const debugElement = document.getElementById("debug");
 const toggleCirclesCheckbox = document.getElementById("toggleCircles");
@@ -119,7 +121,15 @@ toggleEnemyMovementCheckbox.addEventListener("change", () => {
 enemySpeedInput.addEventListener("input", () => {
   enemySpeed = parseFloat(enemySpeedInput.value);
   enemySpeedValue.textContent = enemySpeed;
-  updateEnemyVelocities();
+  enemies.forEach((enemy) => enemy.updateVelocity());
+});
+
+entitySizeInput.addEventListener("input", () => {
+  entitySize = parseFloat(entitySizeInput.value);
+  entitySizeValue.textContent = entitySize;
+  enemies.forEach((enemy) => (enemy.radius = entitySize));
+  player.radius = entitySize;
+  draw();
 });
 
 useMultishotCheckbox.addEventListener("change", () => {
@@ -182,6 +192,9 @@ enemyCountInput.addEventListener("input", () => {
 // Initialize control panel values
 document.getElementById("beamLengthInput").value = baseBeamLength;
 document.getElementById("beamLengthValue").textContent = baseBeamLength;
+
+document.getElementById("entitySizeInput").value = entitySize;
+document.getElementById("entitySizeValue").textContent = entitySize;
 
 document.getElementById("zoomFactorInput").value = zoomFactor;
 document.getElementById("zoomFactorValue").textContent = zoomFactor;
@@ -904,11 +917,6 @@ function resetGame() {
 
   // Redraw the canvas
   draw();
-}
-
-// Function to update velocities of all enemies
-function updateEnemyVelocities() {
-  enemies.forEach((enemy) => enemy.updateVelocity());
 }
 
 // Initial draw and start the update loop
