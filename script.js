@@ -459,13 +459,14 @@ class Enemy extends Entity {
     }
 
     // Draw the number of chains above the enemy in bold
-    ctx.font = `bold 0.4px Arial`;
+    ctx.font = `bold ${0.8 * entitySize}px Arial`;
     ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
 
     // Draw the text with a thin white outline
     ctx.lineWidth = 0.05;
     ctx.fillStyle = "#000000";
-    ctx.fillText(this.chains.length, this.x, this.y + 0.15);
+    ctx.fillText(this.chains.length, this.x, this.y + entitySize / 15);
 
     // Calculate and draw the total damage percentage and status chance above the enemy
     if (showDamageNumbers || showStatusChance) {
