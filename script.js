@@ -5,6 +5,7 @@
 //TODO: enemy spawn controls?
 //TODO: expand scope to saryn spore/miasma simulation?
 //TODO: ememy controls panel
+//TODO: hide UI button
 
 // Get the canvas element and context
 const canvas = document.getElementById("demoCanvas");
