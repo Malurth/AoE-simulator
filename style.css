@@ -81,11 +81,19 @@ html {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   pointer-events: none;
   max-width: fit-content;
+  align-items: center;
   line-height: 1.5;
 }
 
 #controlPanel {
-  row-gap: 10px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+#controlPanel > * {
+  flex-shrink: 0;
 }
 
 #debug {
@@ -161,7 +169,10 @@ input[type="checkbox"]:checked + label {
 }
 
 .slider-container {
+  display: flex;
+  align-items: center;
   position: relative;
+  column-gap: 5px;
   width: 100%;
 }
 
@@ -174,16 +185,4 @@ input[type="checkbox"]:checked + label {
 
 input[type="text"] {
   width: 30px;
-}
-
-@media (max-width: 768px) {
-  #top-container {
-    flex-direction: column;
-  }
-
-  #upperPanelContainer,
-  #upperRightPanelContainer,
-  #lowerPanelContainer {
-    width: 100%;
-  }
 }

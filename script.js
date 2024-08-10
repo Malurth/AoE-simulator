@@ -6,6 +6,7 @@
 //TODO: expand scope to saryn spore/miasma simulation?
 //TODO: ememy controls panel
 //TODO: hide UI button
+//TODO: fix instructions not appearing good on mobile
 
 // Get the canvas element and context
 const canvas = document.getElementById("demoCanvas");
