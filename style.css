@@ -176,7 +176,6 @@ input[type="checkbox"]:checked + label {
   align-items: center;
   position: relative;
   column-gap: 5px;
-  width: 100%;
 }
 
 .slider-value {
