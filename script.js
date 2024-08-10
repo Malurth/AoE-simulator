@@ -60,7 +60,7 @@ let showCircles = toggleCirclesCheckbox.dataset.state;
 let showBeams = toggleBeamsCheckbox.checked;
 let enemyMovementEnabled = toggleEnemyMovementCheckbox.checked;
 let showDamageNumbers = toggleDamageNumbersCheckbox.checked;
-let showStatusChance = toggleStatusChanceCheckbox.checked;
+let showStatusChance = false;
 let useMultishot = useMultishotCheckbox.checked;
 let useMultishotAs100Percent = useMultishotAs100PercentCheckbox.checked;
 
@@ -189,7 +189,7 @@ document.getElementById("toggleCircles").checked = showCircles;
 document.getElementById("toggleBeams").checked = showBeams;
 document.getElementById("toggleEnemyMovement").checked = enemyMovementEnabled;
 document.getElementById("toggleDamageNumbers").checked = showDamageNumbers;
-document.getElementById("toggleStatusChance").checked = showStatusChance;
+document.getElementById("toggleStatusChance").checked = false;
 document.getElementById("useMultishot").checked = useMultishot;
 document.getElementById("useMultishotAs100Percent").checked = useMultishotAs100Percent;
 document.getElementById("useMultishotAs100Percent").disabled = !useMultishot;
