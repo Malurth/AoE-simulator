@@ -909,14 +909,20 @@ function handleResize() {
   resetGame();
 }
 
-function toggleUI() {
-  if (uiContainer.style.display === "none") {
-    uiContainer.style.display = "flex";
-    hideUIButton.textContent = "Hide UI";
-  } else {
-    uiContainer.style.display = "none";
-    hideUIButton.textContent = "Show UI";
-  }
+function showUI() {
+  uiContainer.style.display = "flex";
+  showUIButton.style.display = "none";
 }
 
-hideUIButton.addEventListener("click", toggleUI);
+function hideUI() {
+  uiContainer.style.display = "none";
+  showUIButton.style.display = "block";
+}
+
+const showUIButton = document.getElementById("showUIButton");
+
+showUIButton.addEventListener("click", showUI);
+hideUIButton.addEventListener("click", hideUI);
+
+// Initially hide the "Show UI" button
+showUIButton.style.display = "none";

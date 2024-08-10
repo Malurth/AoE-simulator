@@ -11,7 +11,7 @@
 <body>
     <div id="app-container">
         <canvas id="demoCanvas"></canvas>
-        <button id="hideUIButton" class="hide-ui-button">Hide UI</button>
+        <button id="showUIButton" class="show-ui-button">Show UI</button>
         <div id="ui-container">
             <div id="top-container">
                 <section id="upperPanelContainer">
@@ -42,30 +42,32 @@
                         <input type="range" id="enemySpeedInput" min="0" max="10" step="0.1">
                         <span id="enemySpeedValue"></span>
                     </div>
-                    <div id="toridPanel">
-                        <div class="slider-container">
-                            <label for="beamLengthInput">Beam Length:</label>
-                            <input type="range" id="beamLengthInput" min="10" max="100" step="1">
-                            <span id="beamLengthValue"></span>
-                        </div>
-                        <div class="slider-container">
-                            <label for="maxChainDepthInput">Max Chain Depth:</label>
-                            <input type="range" id="maxChainDepthInput" min="1" max="10" step="1">
-                            <span id="maxChainDepthValue">5</span>
-                        </div>
-                        <div class="slider-container">
-                            <label for="chainRadiusInput">Chain Radius:</label>
-                            <input type="range" id="chainRadiusInput" min="1" max="10" step="1">
-                            <span id="chainRadiusValue">6</span>
-                        </div>
-                        <div>
-                            <button id="resetButton">Reset</button>
-                            <input type="checkbox" id="useMultishot" checked>
-                            <label for="useMultishot">Use Multishot</label>
-                            <input type="checkbox" id="useMultishotAs100Percent" checked>
-                            <label for="useMultishotAs100Percent" id="useMultishotAs100PercentLabel">as 100%</label>
-                            <input type="text" id="multishotCountInput" min="100" max="1000" step="1">
-                        </div>
+                    <div id="underControlPanel">
+                        <div id="toridPanel">
+                            <div class="slider-container">
+                                <label for="beamLengthInput">Beam Length:</label>
+                                <input type="range" id="beamLengthInput" min="10" max="100" step="1">
+                                <span id="beamLengthValue"></span>
+                            </div>
+                            <div class="slider-container">
+                                <label for="maxChainDepthInput">Max Chain Depth:</label>
+                                <input type="range" id="maxChainDepthInput" min="1" max="10" step="1">
+                                <span id="maxChainDepthValue">5</span>
+                            </div>
+                            <div class="slider-container">
+                                <label for="chainRadiusInput">Chain Radius:</label>
+                                <input type="range" id="chainRadiusInput" min="1" max="10" step="1">
+                                <span id="chainRadiusValue">6</span>
+                            </div>
+                            <div>
+                                <button id="resetButton">Reset</button>
+                                <input type="checkbox" id="useMultishot" checked>
+                                <label for="useMultishot">Use Multishot</label>
+                                <input type="checkbox" id="useMultishotAs100Percent" checked>
+                                <label for="useMultishotAs100Percent" id="useMultishotAs100PercentLabel">as 100%</label>
+                                <input type="text" id="multishotCountInput" min="100" max="1000" step="1">
+                            </div>
+                        </div><button id="hideUIButton" class="hide-ui-button">Hide UI</button>
                     </div>
                 </section>
                 <section id="upperRightPanelContainer">

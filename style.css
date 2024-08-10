@@ -96,6 +96,14 @@ html {
   flex-shrink: 0;
 }
 
+#underControlPanel {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 5px;
+}
+
 #debug {
   font-family: monospace;
   font-size: 12px;
@@ -199,11 +207,8 @@ input[type="text"] {
   }
 }
 
+.show-ui-button,
 .hide-ui-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 1000;
   padding: 5px 10px;
   background-color: rgba(255, 255, 255, 0.8);
   border: none;
@@ -213,6 +218,18 @@ input[type="text"] {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
+.show-ui-button:hover,
 .hide-ui-button:hover {
   background-color: rgba(255, 255, 255, 1);
+}
+
+.show-ui-button {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
+}
+
+.hide-ui-button {
+  margin-bottom: 10px;
 }
