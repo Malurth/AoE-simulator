@@ -51,6 +51,7 @@ const toggleCirclesCheckbox = document.getElementById("toggleCircles");
 const toggleBeamsCheckbox = document.getElementById("toggleBeams");
 const toggleEnemyMovementCheckbox = document.getElementById("toggleEnemyMovement");
 const toggleDamageNumbersCheckbox = document.getElementById("toggleDamageNumbers");
+const toggleStatusChanceCheckbox = document.getElementById("toggleStatusChance");
 const useMultishotCheckbox = document.getElementById("useMultishot");
 const useMultishotAs100PercentCheckbox = document.getElementById("useMultishotAs100Percent");
 const multishotCountInput = document.getElementById("multishotCountInput");
@@ -59,6 +60,7 @@ let showCircles = toggleCirclesCheckbox.dataset.state;
 let showBeams = toggleBeamsCheckbox.checked;
 let enemyMovementEnabled = toggleEnemyMovementCheckbox.checked;
 let showDamageNumbers = toggleDamageNumbersCheckbox.checked;
+let showStatusChance = toggleStatusChanceCheckbox.checked;
 let useMultishot = useMultishotCheckbox.checked;
 let useMultishotAs100Percent = useMultishotAs100PercentCheckbox.checked;
 
@@ -104,6 +106,11 @@ toggleBeamsCheckbox.addEventListener("change", () => {
 
 toggleDamageNumbersCheckbox.addEventListener("change", () => {
   showDamageNumbers = toggleDamageNumbersCheckbox.checked;
+  draw();
+});
+
+toggleStatusChanceCheckbox.addEventListener("change", () => {
+  showStatusChance = toggleStatusChanceCheckbox.checked;
   draw();
 });
 
@@ -182,6 +189,7 @@ document.getElementById("toggleCircles").checked = showCircles;
 document.getElementById("toggleBeams").checked = showBeams;
 document.getElementById("toggleEnemyMovement").checked = enemyMovementEnabled;
 document.getElementById("toggleDamageNumbers").checked = showDamageNumbers;
+document.getElementById("toggleStatusChance").checked = showStatusChance;
 document.getElementById("useMultishot").checked = useMultishot;
 document.getElementById("useMultishotAs100Percent").checked = useMultishotAs100Percent;
 document.getElementById("useMultishotAs100Percent").disabled = !useMultishot;
@@ -414,28 +422,38 @@ class Enemy extends Entity {
     ctx.fillStyle = "#000000";
     ctx.fillText(this.chains.length, this.x, this.y + this.radius / 2.8);
 
-    // Calculate and draw the total damage percentage above the enemy
-    if (showDamageNumbers) {
+    // Calculate and draw the total damage percentage and status chance above the enemy
+    if (showDamageNumbers || showStatusChance) {
       ctx.font = `0.3px Arial`;
       const { totalDamage, mainBeamDamage, aoeDamage, statusChance } = this.calculateTotalDamageAndStatus();
       ctx.strokeStyle = "#000000";
       ctx.fillStyle = "#FFFFFF";
-      if (totalDamage > 0) {
-        ctx.strokeText(`${totalDamage.toFixed(2)}%`, this.x, this.y - this.radius - 0.1);
-        ctx.fillText(`${totalDamage.toFixed(2)}%`, this.x, this.y - this.radius - 0.1);
+
+      let yOffset = -this.radius - 0.1;
+
+      if (showDamageNumbers && totalDamage > 0) {
+        ctx.strokeText(`${totalDamage.toFixed(2)}%`, this.x, this.y + yOffset);
+        ctx.fillText(`${totalDamage.toFixed(2)}%`, this.x, this.y + yOffset);
+        yOffset -= 0.4;
       }
-      if (mainBeamDamage > 0 && aoeDamage > 0) {
-        ctx.fillStyle = mainBeamHitColor;
-        ctx.strokeText(`${mainBeamDamage.toFixed(2)}%`, this.x, this.y - this.radius + 1.1);
-        ctx.fillText(`${mainBeamDamage.toFixed(2)}%`, this.x, this.y - this.radius + 1.1);
-        ctx.fillStyle = aoeHitColor;
-        ctx.strokeText(`${aoeDamage.toFixed(2)}%`, this.x, this.y - this.radius + 1.5);
-        ctx.fillText(`${aoeDamage.toFixed(2)}%`, this.x, this.y - this.radius + 1.5);
-      }
-      if (statusChance > 0) {
+
+      if (showStatusChance && statusChance > 0) {
         ctx.fillStyle = "#FFFF00";
-        ctx.strokeText(`${statusChance.toFixed(2)}%`, this.x, this.y - this.radius - 0.5);
-        ctx.fillText(`${statusChance.toFixed(2)}%`, this.x, this.y - this.radius - 0.5);
+        ctx.strokeText(`${statusChance.toFixed(2)}%`, this.x, this.y + yOffset);
+        ctx.fillText(`${statusChance.toFixed(2)}%`, this.x, this.y + yOffset);
+      }
+
+      if (showDamageNumbers && mainBeamDamage > 0 && aoeDamage > 0) {
+        yOffset = this.radius + 0.3; // Reset yOffset for beam and AoE damage
+
+        ctx.fillStyle = mainBeamHitColor;
+        ctx.strokeText(`${mainBeamDamage.toFixed(2)}%`, this.x, this.y + yOffset);
+        ctx.fillText(`${mainBeamDamage.toFixed(2)}%`, this.x, this.y + yOffset);
+        yOffset += 0.4;
+
+        ctx.fillStyle = aoeHitColor;
+        ctx.strokeText(`${aoeDamage.toFixed(2)}%`, this.x, this.y + yOffset);
+        ctx.fillText(`${aoeDamage.toFixed(2)}%`, this.x, this.y + yOffset);
       }
     }
   }
