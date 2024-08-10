@@ -37,7 +37,7 @@ let maxChainDepth = 5;
 let chainRadius = 6;
 let currentBeamLength = baseBeamLength;
 
-// #region Control Panel
+// #region UI
 const beamLengthInput = document.getElementById("beamLengthInput");
 const zoomFactorInput = document.getElementById("zoomFactorInput");
 const enemyCountInput = document.getElementById("enemyCountInput");
@@ -60,6 +60,8 @@ const toggleStatusChanceCheckbox = document.getElementById("toggleStatusChance")
 const useMultishotCheckbox = document.getElementById("useMultishot");
 const useMultishotAs100PercentCheckbox = document.getElementById("useMultishotAs100Percent");
 const multishotCountInput = document.getElementById("multishotCountInput");
+const uiContainer = document.getElementById("ui-container");
+const hideUIButton = document.getElementById("hideUIButton");
 
 let showCircles = toggleCirclesCheckbox.dataset.state;
 let showBeams = toggleBeamsCheckbox.checked;
@@ -775,7 +777,7 @@ function draw() {
     Base Beam Length: ${baseBeamLength.toFixed(2)}<br>
     Current Beam Length: ${currentBeamLength.toFixed(2)}<br>
     Beam Endpoint: (${collisionResult.endX.toFixed(2)}, ${collisionResult.endY.toFixed(2)})<br>
-    Collision Detected: ${collisionResult.intersected}<br>
+    Beam Collision: ${collisionResult.intersected}<br>
     Main Beam Hits (w/ chain): ${totalMainBeamHits}<br>
     AoE Hits (w/ chains): ${totalAoeHits}<br>
     Main Beam Direct Hits: ${mainBeamDirectHits}<br>
@@ -902,3 +904,15 @@ function handleResize() {
   ctx.scale(zoomFactor, zoomFactor);
   resetGame();
 }
+
+function toggleUI() {
+  if (uiContainer.style.display === "none") {
+    uiContainer.style.display = "flex";
+    hideUIButton.textContent = "Hide UI";
+  } else {
+    uiContainer.style.display = "none";
+    hideUIButton.textContent = "Show UI";
+  }
+}
+
+hideUIButton.addEventListener("click", toggleUI);
