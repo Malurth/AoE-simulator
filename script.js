@@ -62,6 +62,7 @@ const useMultishotAs100PercentCheckbox = document.getElementById("useMultishotAs
 const multishotCountInput = document.getElementById("multishotCountInput");
 const uiContainer = document.getElementById("ui-container");
 const hideUIButton = document.getElementById("hideUIButton");
+const showUIButton = document.getElementById("showUIButton");
 
 let showCircles = toggleCirclesCheckbox.dataset.state;
 let showBeams = toggleBeamsCheckbox.checked;
@@ -79,16 +80,6 @@ if (showCircles === "full") {
 } else {
   toggleCirclesCheckbox.nextElementSibling.style.backgroundColor = "red";
 }
-
-toggleEnemyMovementCheckbox.addEventListener("change", () => {
-  enemyMovementEnabled = toggleEnemyMovementCheckbox.checked;
-});
-
-enemySpeedInput.addEventListener("input", () => {
-  enemySpeed = parseFloat(enemySpeedInput.value);
-  enemySpeedValue.textContent = enemySpeed;
-  updateEnemyVelocities();
-});
 
 const circleStates = ["full", "partial", "off"];
 const circleColors = {
@@ -121,6 +112,16 @@ toggleStatusChanceCheckbox.addEventListener("change", () => {
   draw();
 });
 
+toggleEnemyMovementCheckbox.addEventListener("change", () => {
+  enemyMovementEnabled = toggleEnemyMovementCheckbox.checked;
+});
+
+enemySpeedInput.addEventListener("input", () => {
+  enemySpeed = parseFloat(enemySpeedInput.value);
+  enemySpeedValue.textContent = enemySpeed;
+  updateEnemyVelocities();
+});
+
 useMultishotCheckbox.addEventListener("change", () => {
   useMultishot = useMultishotCheckbox.checked;
   useMultishotAs100PercentCheckbox.disabled = !useMultishot;
@@ -142,6 +143,8 @@ multishotCountInput.addEventListener("input", () => {
 });
 
 resetButton.addEventListener("click", resetToridVariables);
+showUIButton.addEventListener("click", showUI);
+hideUIButton.addEventListener("click", hideUI);
 
 beamLengthInput.addEventListener("input", () => {
   baseBeamLength = parseFloat(beamLengthInput.value);
@@ -275,6 +278,18 @@ document.getElementById("playerColorPicker").addEventListener("input", (event) =
 });
 
 //#endregion
+
+showUIButton.style.display = "none";
+
+function showUI() {
+  uiContainer.style.display = "flex";
+  showUIButton.style.display = "none";
+}
+
+function hideUI() {
+  uiContainer.style.display = "none";
+  showUIButton.style.display = "block";
+}
 
 // Apply zoom to the canvas context
 ctx.scale(zoomFactor, zoomFactor);
@@ -908,21 +923,3 @@ function handleResize() {
   ctx.scale(zoomFactor, zoomFactor);
   resetGame();
 }
-
-function showUI() {
-  uiContainer.style.display = "flex";
-  showUIButton.style.display = "none";
-}
-
-function hideUI() {
-  uiContainer.style.display = "none";
-  showUIButton.style.display = "block";
-}
-
-const showUIButton = document.getElementById("showUIButton");
-
-showUIButton.addEventListener("click", showUI);
-hideUIButton.addEventListener("click", hideUI);
-
-// Initially hide the "Show UI" button
-showUIButton.style.display = "none";
