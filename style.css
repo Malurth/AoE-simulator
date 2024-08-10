@@ -143,5 +143,5 @@ input[type="checkbox"]:checked + label {
 }
 
 input[type="text"] {
-  width: 50px;
+  width: 30px;
 }

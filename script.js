@@ -109,6 +109,8 @@ toggleDamageNumbersCheckbox.addEventListener("change", () => {
 
 useMultishotCheckbox.addEventListener("change", () => {
   useMultishot = useMultishotCheckbox.checked;
+  useMultishotAs100PercentCheckbox.disabled = !useMultishot;
+  document.getElementById("useMultishotAs100PercentLabel").style.opacity = useMultishot ? "1" : "0.5";
   draw();
 });
 
@@ -182,6 +184,8 @@ document.getElementById("toggleEnemyMovement").checked = enemyMovementEnabled;
 document.getElementById("toggleDamageNumbers").checked = showDamageNumbers;
 document.getElementById("useMultishot").checked = useMultishot;
 document.getElementById("useMultishotAs100Percent").checked = useMultishotAs100Percent;
+document.getElementById("useMultishotAs100Percent").disabled = !useMultishot;
+document.getElementById("useMultishotAs100PercentLabel").style.opacity = useMultishot ? "1" : "0.5";
 document.getElementById("multishotCountInput").value = multishot;
 
 document.getElementById("enemySpeedInput").value = enemySpeed;
@@ -329,44 +333,51 @@ class Enemy extends Entity {
     this.chains = [];
   }
 
-  calculateTotalDamage() {
+  calculateTotalDamageAndStatus() {
     let totalMainBeamDamage = 0;
     let totalAoeDamage = 0;
+    let statusChance = 0;
 
-    // Calculate main beam damage
+    // Calculate main beam damage and status chance
     if (this.isPrimaryMainBeamTarget) {
       totalMainBeamDamage += useMultishot ? multishot : 100;
+      statusChance += useMultishot ? multishot : 100;
     }
 
     let mainBeamChainDepth = this.chains.filter((c) => c.chain.isMainBeam).reduce((min, c) => Math.min(min, c.depth), Infinity);
     if (mainBeamChainDepth !== Infinity) {
       totalMainBeamDamage += 100 * Math.pow(0.75, mainBeamChainDepth) * (useMultishot ? multishot / 100 : 1);
+      statusChance += useMultishot ? multishot : 100;
     }
 
-    // Calculate AoE damage
+    // Calculate AoE damage and status chance
     if (this.isPrimaryAoETarget) {
       totalAoeDamage += 100;
+      statusChance += 100;
     }
 
-    // Sum up all AoE chain damages
+    // Sum up all AoE chain damages and status chances
     this.chains
       .filter((c) => !c.chain.isMainBeam)
       .forEach((c) => {
         totalAoeDamage += 100 * Math.pow(0.75, c.depth);
+        statusChance += 100;
       });
 
     let totalDamage = totalMainBeamDamage + totalAoeDamage;
 
-    if (useMultishotAs100Percent) {
+    if (useMultishot && useMultishotAs100Percent) {
       totalDamage /= multishot / 100;
       totalMainBeamDamage /= multishot / 100;
       totalAoeDamage /= multishot / 100;
+      statusChance /= multishot / 100;
     }
 
     return {
       totalDamage,
       mainBeamDamage: totalMainBeamDamage,
       aoeDamage: totalAoeDamage,
+      statusChance,
     };
   }
 
@@ -406,7 +417,7 @@ class Enemy extends Entity {
     // Calculate and draw the total damage percentage above the enemy
     if (showDamageNumbers) {
       ctx.font = `0.3px Arial`;
-      const { totalDamage, mainBeamDamage, aoeDamage } = this.calculateTotalDamage();
+      const { totalDamage, mainBeamDamage, aoeDamage, statusChance } = this.calculateTotalDamageAndStatus();
       ctx.strokeStyle = "#000000";
       ctx.fillStyle = "#FFFFFF";
       ctx.strokeText(`${totalDamage.toFixed(2)}%`, this.x, this.y - this.radius - 0.1);
@@ -419,6 +430,9 @@ class Enemy extends Entity {
         ctx.strokeText(`${aoeDamage.toFixed(2)}%`, this.x, this.y - this.radius + 1.5);
         ctx.fillText(`${aoeDamage.toFixed(2)}%`, this.x, this.y - this.radius + 1.5);
       }
+      ctx.fillStyle = "#FFFF00";
+      ctx.strokeText(`${statusChance.toFixed(2)}%`, this.x, this.y - this.radius - 0.5);
+      ctx.fillText(`${statusChance.toFixed(2)}%`, this.x, this.y - this.radius - 0.5);
     }
   }
 
