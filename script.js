@@ -420,8 +420,10 @@ class Enemy extends Entity {
       const { totalDamage, mainBeamDamage, aoeDamage, statusChance } = this.calculateTotalDamageAndStatus();
       ctx.strokeStyle = "#000000";
       ctx.fillStyle = "#FFFFFF";
-      ctx.strokeText(`${totalDamage.toFixed(2)}%`, this.x, this.y - this.radius - 0.1);
-      ctx.fillText(`${totalDamage.toFixed(2)}%`, this.x, this.y - this.radius - 0.1);
+      if (totalDamage > 0) {
+        ctx.strokeText(`${totalDamage.toFixed(2)}%`, this.x, this.y - this.radius - 0.1);
+        ctx.fillText(`${totalDamage.toFixed(2)}%`, this.x, this.y - this.radius - 0.1);
+      }
       if (mainBeamDamage > 0 && aoeDamage > 0) {
         ctx.fillStyle = mainBeamHitColor;
         ctx.strokeText(`${mainBeamDamage.toFixed(2)}%`, this.x, this.y - this.radius + 1.1);
@@ -430,9 +432,11 @@ class Enemy extends Entity {
         ctx.strokeText(`${aoeDamage.toFixed(2)}%`, this.x, this.y - this.radius + 1.5);
         ctx.fillText(`${aoeDamage.toFixed(2)}%`, this.x, this.y - this.radius + 1.5);
       }
-      ctx.fillStyle = "#FFFF00";
-      ctx.strokeText(`${statusChance.toFixed(2)}%`, this.x, this.y - this.radius - 0.5);
-      ctx.fillText(`${statusChance.toFixed(2)}%`, this.x, this.y - this.radius - 0.5);
+      if (statusChance > 0) {
+        ctx.fillStyle = "#FFFF00";
+        ctx.strokeText(`${statusChance.toFixed(2)}%`, this.x, this.y - this.radius - 0.5);
+        ctx.fillText(`${statusChance.toFixed(2)}%`, this.x, this.y - this.radius - 0.5);
+      }
     }
   }
 
