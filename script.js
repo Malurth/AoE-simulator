@@ -65,6 +65,7 @@ const multishotCountInput = document.getElementById("multishotCountInput");
 const uiContainer = document.getElementById("ui-container");
 const hideUIButton = document.getElementById("hideUIButton");
 const showUIButton = document.getElementById("showUIButton");
+const firestormToggle = document.getElementById("firestormToggle");
 
 let showCircles = toggleCirclesCheckbox.dataset.state;
 let showBeams = toggleBeamsCheckbox.checked;
@@ -73,6 +74,7 @@ let showDamageNumbers = toggleDamageNumbersCheckbox.checked;
 let showStatusChance = false;
 let useMultishot = useMultishotCheckbox.checked;
 let useMultishotAs100Percent = useMultishotAs100PercentCheckbox.checked;
+let isPrimedFirestormActive = false;
 
 // Set initial background color based on the data-state attribute
 if (showCircles === "full") {
@@ -189,6 +191,12 @@ enemyCountInput.addEventListener("input", () => {
   draw();
 });
 
+firestormToggle.addEventListener("change", () => {
+  isPrimedFirestormActive = firestormToggle.checked;
+  toridBaseAoE = isPrimedFirestormActive ? 4.32 : 3;
+  draw();
+});
+
 // Initialize control panel values
 document.getElementById("beamLengthInput").value = baseBeamLength;
 document.getElementById("beamLengthValue").textContent = baseBeamLength;
@@ -221,6 +229,8 @@ document.getElementById("multishotCountInput").value = multishot;
 
 document.getElementById("enemySpeedInput").value = enemySpeed;
 document.getElementById("enemySpeedValue").textContent = enemySpeed;
+
+firestormToggle.checked = isPrimedFirestormActive;
 // #endregion
 
 // #region Color Picker / Legend
@@ -875,6 +885,8 @@ canvas.addEventListener("mousemove", (event) => {
 
 canvas.addEventListener("mousedown", (event) => {
   if (event.button === 0) {
+    isPrimedFirestormActive = true;
+    firestormToggle.checked = true;
     toridBaseAoE = 4.32; // primed firestorm
     draw();
   }
@@ -882,6 +894,8 @@ canvas.addEventListener("mousedown", (event) => {
 
 canvas.addEventListener("mouseup", (event) => {
   if (event.button === 0) {
+    isPrimedFirestormActive = false;
+    firestormToggle.checked = false;
     toridBaseAoE = 3; // regular
     draw();
   }
