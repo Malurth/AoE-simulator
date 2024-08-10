@@ -9,94 +9,103 @@
 </head>
 
 <body>
-    <canvas id="demoCanvas"></canvas>
-    <section class="panelContainer" id="upperPanelContainer">
-        <div id="controlPanel">
-            <label for="zoomFactorInput">Zoom Factor:</label>
-            <input type="range" id="zoomFactorInput" min="10" max="100" step="1">
-            <span id="zoomFactorValue"></span>
+    <div id="app-container">
+        <canvas id="demoCanvas"></canvas>
+        <div id="ui-container">
+            <div id="top-container">
+                <section id="upperPanelContainer">
+                    <div id="controlPanel">
+                        <label for="zoomFactorInput">Zoom Factor:</label>
+                        <input type="range" id="zoomFactorInput" min="10" max="100" step="1">
+                        <span id="zoomFactorValue"></span>
 
-            <label for="enemyCountInput">Enemy Count:</label>
-            <input type="range" id="enemyCountInput" min="1" max="200" step="1">
-            <span id="enemyCountValue"></span>
+                        <label for="enemyCountInput">Enemy Count:</label>
+                        <input type="range" id="enemyCountInput" min="1" max="200" step="1">
+                        <span id="enemyCountValue"></span>
 
-            <input type="checkbox" id="toggleCircles" data-state="off">
-            <label for="toggleCircles">Chain Range Indicators</label>
+                        <input type="checkbox" id="toggleCircles" data-state="off">
+                        <label for="toggleCircles">Chain Range Indicators</label>
 
-            <input type="checkbox" id="toggleBeams" checked>
-            <label for="toggleBeams">Connecting Beams</label>
+                        <input type="checkbox" id="toggleBeams" checked>
+                        <label for="toggleBeams">Connecting Beams</label>
 
-            <input type="checkbox" id="toggleEnemyMovement" checked>
-            <label for="toggleEnemyMovement">Enemy Movement</label>
+                        <input type="checkbox" id="toggleEnemyMovement" checked>
+                        <label for="toggleEnemyMovement">Enemy Movement</label>
 
-            <input type="checkbox" id="toggleDamageNumbers" checked>
-            <label for="toggleDamageNumbers">Show Damage Numbers</label>
-            <input type="checkbox" id="toggleStatusChance">
-            <label for="toggleStatusChance">Show Status Chance</label>
+                        <input type="checkbox" id="toggleDamageNumbers" checked>
+                        <label for="toggleDamageNumbers">Show Damage Numbers</label>
+                        <input type="checkbox" id="toggleStatusChance">
+                        <label for="toggleStatusChance">Show Status Chance</label>
 
-            <label for="enemySpeedInput">Enemy Speed:</label>
-            <input type="range" id="enemySpeedInput" min="0" max="10" step="0.1">
-            <span id="enemySpeedValue"></span>
+                        <label for="enemySpeedInput">Enemy Speed:</label>
+                        <input type="range" id="enemySpeedInput" min="0" max="10" step="0.1">
+                        <span id="enemySpeedValue"></span>
+                    </div>
+                    <div id="debug"></div>
+                </section>
+                <section id="upperRightPanelContainer">
+                    <div id="toridPanel">
+                        <div class="slider-container">
+                            <label for="beamLengthInput">Beam Length:</label>
+                            <input type="range" id="beamLengthInput" min="10" max="100" step="1">
+                            <span id="beamLengthValue"></span>
+                        </div>
+                        <div class="slider-container">
+                            <label for="maxChainDepthInput">Max Chain Depth:</label>
+                            <input type="range" id="maxChainDepthInput" min="1" max="10" step="1">
+                            <span id="maxChainDepthValue">5</span>
+                        </div>
+                        <div class="slider-container">
+                            <label for="chainRadiusInput">Chain Radius:</label>
+                            <input type="range" id="chainRadiusInput" min="1" max="10" step="1">
+                            <span id="chainRadiusValue">6</span>
+                        </div>
+                        <div>
+                            <button id="resetButton">Reset</button>
+                            <input type="checkbox" id="useMultishot" checked>
+                            <label for="useMultishot">Use Multishot</label>
+                            <input type="checkbox" id="useMultishotAs100Percent" checked>
+                            <label for="useMultishotAs100Percent" id="useMultishotAs100PercentLabel">as 100%</label>
+                            <input type="text" id="multishotCountInput" min="100" max="1000" step="1">
+                        </div>
+
+                    </div>
+                </section>
+            </div>
+            <div id="bottom-container">
+                <section id="lowerPanelContainer">
+                    <div class="legend">
+                        <h3>Legend</h3>
+                        <div class="legend-item">
+                            <span id="enemyColor" class="legend-color"></span> Enemy
+                            <input type="color" id="enemyColorPicker" class="color-picker">
+                        </div>
+                        <div class="legend-item">
+                            <span id="beamHitColor" class="legend-color"></span> Beam Hit
+                            <input type="color" id="beamHitColorPicker" class="color-picker">
+                        </div>
+                        <div class="legend-item">
+                            <span id="aoeHitColor" class="legend-color"></span> AoE Hit
+                            <input type="color" id="aoeHitColorPicker" class="color-picker">
+                        </div>
+                        <div class="legend-item">
+                            <span id="beamColor" class="legend-color"></span> Beam
+                            <input type="color" id="beamColorPicker" class="color-picker">
+                        </div>
+                        <div class="legend-item">
+                            <span id="playerColor" class="legend-color"></span> Player
+                            <input type="color" id="playerColorPicker" class="color-picker">
+                        </div>
+                    </div>
+                    <div id="infoPanel">
+                        Hold Left Mouse Button to toggle Primed Firestorm. WASD / Arrow keys to move. (Chains always
+                        target nearest
+                        viable target, idk if that is actually how that works.)
+                    </div>
+                </section>
+            </div>
         </div>
-        <div id="debug"></div>
-    </section>
-    <section class="panelContainer" id="upperRightPanelContainer">
-        <div id="toridPanel">
-            <div class="slider-container">
-                <label for="beamLengthInput">Beam Length:</label>
-                <input type="range" id="beamLengthInput" min="10" max="100" step="1">
-                <span id="beamLengthValue"></span>
-            </div>
-            <div class="slider-container">
-                <label for="maxChainDepthInput">Max Chain Depth:</label>
-                <input type="range" id="maxChainDepthInput" min="1" max="10" step="1">
-                <span id="maxChainDepthValue">5</span>
-            </div>
-            <div class="slider-container">
-                <label for="chainRadiusInput">Chain Radius:</label>
-                <input type="range" id="chainRadiusInput" min="1" max="10" step="1">
-                <span id="chainRadiusValue">6</span>
-            </div>
-            <div>
-                <button id="resetButton">Reset</button>
-                <input type="checkbox" id="useMultishot" checked>
-                <label for="useMultishot">Use Multishot</label>
-                <input type="checkbox" id="useMultishotAs100Percent" checked>
-                <label for="useMultishotAs100Percent" id="useMultishotAs100PercentLabel">as 100%</label>
-                <input type="text" id="multishotCountInput" min="100" max="1000" step="1">
-            </div>
-
-        </div>
-    </section>
-    <section class="panelContainer" id="lowerPanelContainer">
-        <div class="legend">
-            <h3>Legend</h3>
-            <div class="legend-item">
-                <span id="enemyColor" class="legend-color"></span> Enemy
-                <input type="color" id="enemyColorPicker" class="color-picker">
-            </div>
-            <div class="legend-item">
-                <span id="beamHitColor" class="legend-color"></span> Beam Hit
-                <input type="color" id="beamHitColorPicker" class="color-picker">
-            </div>
-            <div class="legend-item">
-                <span id="aoeHitColor" class="legend-color"></span> AoE Hit
-                <input type="color" id="aoeHitColorPicker" class="color-picker">
-            </div>
-            <div class="legend-item">
-                <span id="beamColor" class="legend-color"></span> Beam
-                <input type="color" id="beamColorPicker" class="color-picker">
-            </div>
-            <div class="legend-item">
-                <span id="playerColor" class="legend-color"></span> Player
-                <input type="color" id="playerColorPicker" class="color-picker">
-            </div>
-        </div>
-        <div id="infoPanel">
-            Hold Left Mouse Button to toggle Primed Firestorm. WASD / Arrow keys to move. (Chains always target nearest
-            viable target, idk if that is actually how that works.)
-        </div>
-    </section>
+    </div>
     <script src="script.js"></script>
 </body>
 

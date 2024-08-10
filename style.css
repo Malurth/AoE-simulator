@@ -1,43 +1,70 @@
-body {
+body,
+html {
   margin: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background-color: #282c34;
+  padding: 0;
+  height: 100%;
   overflow: hidden;
+  font-family: Arial, sans-serif;
 }
 
-canvas {
+#app-container {
+  position: relative;
+  height: 100vh;
+  background-color: #282c34;
+}
+
+#demoCanvas {
+  width: 100%;
+  height: 100%;
   border: 1px solid #fff;
 }
 
-.panelContainer {
-  display: flex;
+#ui-container {
   position: absolute;
-  pointer-events: none;
-  gap: 10px;
-}
-
-#upperPanelContainer {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
   flex-direction: column;
-  top: 10px;
-  left: 10px;
+  justify-content: space-between;
+  pointer-events: none;
   align-items: flex-start;
 }
 
-#upperRightPanelContainer {
-  flex-direction: column;
-  top: 10px;
-  right: 10px;
-  align-items: flex-end;
+#top-container {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  width: 100%;
+}
+
+#bottom-container {
+  padding: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: flex-start;
 }
 
 #lowerPanelContainer {
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  align-items: flex-end;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+#upperPanelContainer {
+  margin-right: 10px;
+  margin-bottom: 10px;
+}
+
+#upperPanelContainer,
+#upperRightPanelContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
 }
 
 #controlPanel,
@@ -48,16 +75,12 @@ canvas {
   background-color: rgba(255, 255, 255, 0.8);
   padding: 10px;
   border-radius: 5px;
-  font-family: Arial, sans-serif;
   font-size: 14px;
   user-select: none;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-}
-
-#toridPanel {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  pointer-events: auto;
+  max-width: fit-content;
+  line-height: 1.5;
 }
 
 #debug {
@@ -74,6 +97,7 @@ canvas {
 }
 
 .legend h3 {
+  margin-bottom: 8px;
   margin-top: 0;
   text-align: center;
   width: 100%;
@@ -82,7 +106,7 @@ canvas {
 .legend-item {
   display: flex;
   align-items: center;
-  margin-bottom: 0.5rem;
+  padding: 5px;
 }
 
 .legend-color {
@@ -95,10 +119,13 @@ canvas {
 
 .color-picker {
   position: absolute;
-  bottom: 1rem;
-  left: 1rem;
   opacity: 0;
   pointer-events: none;
+  width: 0;
+  height: 0;
+  padding: 0;
+  margin: 0;
+  border: none;
 }
 
 input,
@@ -129,7 +156,6 @@ input[type="checkbox"]:checked + label {
   background-color: green;
 }
 
-/* Add these new styles */
 .slider-container {
   position: relative;
   width: 100%;
@@ -144,4 +170,16 @@ input[type="checkbox"]:checked + label {
 
 input[type="text"] {
   width: 30px;
+}
+
+@media (max-width: 768px) {
+  #top-container {
+    flex-direction: column;
+  }
+
+  #upperPanelContainer,
+  #upperRightPanelContainer,
+  #lowerPanelContainer {
+    width: 100%;
+  }
 }

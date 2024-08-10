@@ -4,6 +4,7 @@
 //TODO: improve/implement enemy size controls
 //TODO: enemy spawn controls?
 //TODO: expand scope to saryn spore/miasma simulation?
+//TODO: ememy controls panel
 
 // Get the canvas element and context
 const canvas = document.getElementById("demoCanvas");
