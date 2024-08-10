@@ -28,8 +28,8 @@ let playerColor = "#61dafb";
 
 let multishot = 300;
 let enemySpeed = 1;
-let enemyCount = 50;
-let zoomFactor = 50;
+let zoomFactor = isSmallScreen() ? 30 : 50;
+let enemyCount = isSmallScreen() ? 25 : 50;
 let toridBaseAoE = 3;
 let aoeOpacity = 0.05;
 let baseBeamLength = 40;
@@ -597,6 +597,10 @@ class Chain {
     }
     ctx.globalAlpha = 1.0;
   }
+}
+
+function isSmallScreen() {
+  return window.innerWidth < 768 || window.innerHeight < 600;
 }
 
 // Create a player at the center of the screen
