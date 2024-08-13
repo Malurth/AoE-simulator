@@ -5,11 +5,9 @@
 //TODO: expand scope to saryn spore/miasma simulation?
 //TODO: fix instructions not appearing good on mobile
 
-// Get the canvas element and context
 const canvas = document.getElementById("demoCanvas");
 const ctx = canvas.getContext("2d");
 
-// Set canvas size
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
@@ -73,7 +71,6 @@ let useMultishot = useMultishotCheckbox.checked;
 let useMultishotAs100Percent = useMultishotAs100PercentCheckbox.checked;
 let isPrimedFirestormActive = false;
 
-// Set initial background color based on the data-state attribute
 if (showCircles === "full") {
   toggleCirclesCheckbox.nextElementSibling.style.backgroundColor = "green";
 } else if (showCircles === "partial") {
@@ -358,21 +355,21 @@ class Entity {
 class Player extends Entity {
   constructor(x, y) {
     super(x, y, playerColor);
-    this.speed = playerSpeed / zoomFactor; // Adjust speed for zoom
+    this.speed = playerSpeed / zoomFactor;
   }
 }
 
 class Enemy extends Entity {
   constructor(x, y) {
-    super(x, y, enemyColor); // Red color for enemies
-    this.isHit = false; // Initialize as not hit
+    super(x, y, enemyColor);
+    this.isHit = false;
     this.aoeHit = false;
     this.isPrimaryMainBeamTarget = false;
     this.isPrimaryAoETarget = false;
-    this.velocityX = ((Math.random() - 0.5) * enemySpeed) / zoomFactor; // Random initial velocity
-    this.velocityY = ((Math.random() - 0.5) * enemySpeed) / zoomFactor; // Random initial velocity
-    this.initialDirection = { x: this.velocityX, y: this.velocityY }; // Store initial direction
-    this.chains = []; // Store chains and their depths
+    this.velocityX = ((Math.random() - 0.5) * enemySpeed) / zoomFactor;
+    this.velocityY = ((Math.random() - 0.5) * enemySpeed) / zoomFactor;
+    this.initialDirection = { x: this.velocityX, y: this.velocityY };
+    this.chains = [];
   }
 
   addChainInfo(chain, depth) {
@@ -388,7 +385,6 @@ class Enemy extends Entity {
     let totalAoeDamage = 0;
     let statusChance = 0;
 
-    // Calculate main beam damage and status chance
     if (this.isPrimaryMainBeamTarget) {
       totalMainBeamDamage += useMultishot ? multishot : 100;
       statusChance += useMultishot ? multishot : 100;
@@ -400,13 +396,11 @@ class Enemy extends Entity {
       statusChance += useMultishot ? multishot : 100;
     }
 
-    // Calculate AoE damage and status chance
     if (this.isPrimaryAoETarget) {
       totalAoeDamage += 100;
       statusChance += 100;
     }
 
-    // Sum up all AoE chain damages and status chances
     this.chains
       .filter((c) => !c.chain.isMainBeam)
       .forEach((c) => {
@@ -432,7 +426,6 @@ class Enemy extends Entity {
   }
 
   draw(ctx) {
-    // Determine the color based on hit status
     this.color = this.isHit ? (this.aoeHit ? mainBeamHitColor : mainBeamHitColor) : this.aoeHit ? aoeHitColor : enemyColor;
 
     // Draw the main circle
@@ -448,10 +441,10 @@ class Enemy extends Entity {
 
     if (showCircles !== "off") {
       if (this.isHit) {
-        this.drawHitRing(mainBeamHitColor, ctx); // Draw the ring if hit
+        this.drawHitRing(mainBeamHitColor, ctx);
       }
       if (this.aoeHit) {
-        this.drawHitRing(aoeHitColor, ctx); // Draw the ring if hit
+        this.drawHitRing(aoeHitColor, ctx);
       }
     }
 
@@ -459,8 +452,6 @@ class Enemy extends Entity {
     ctx.font = `bold ${0.8 * entitySize}px Arial`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-
-    // Draw the text with a thin white outline
     ctx.lineWidth = 0.05;
     ctx.fillStyle = "#000000";
     ctx.fillText(this.chains.length, this.x, this.y + entitySize / 15);
@@ -489,7 +480,7 @@ class Enemy extends Entity {
       }
 
       if (showDamageNumbers && mainBeamDamage > 0 && aoeDamage > 0) {
-        yOffset = this.radius + 0.3 * partialScaleFactor; // Reset yOffset for beam and AoE damage
+        yOffset = this.radius + 0.3 * partialScaleFactor;
 
         ctx.fillStyle = mainBeamHitColor;
         ctx.strokeText(`${mainBeamDamage.toFixed(2)}%`, this.x, this.y + yOffset);
@@ -544,11 +535,11 @@ class Enemy extends Entity {
       // Bounce off the edges
       if (this.x <= this.radius || this.x >= canvas.width / zoomFactor - this.radius) {
         this.velocityX = -this.velocityX;
-        this.initialDirection.x = -this.initialDirection.x; // Update initial direction
+        this.initialDirection.x = -this.initialDirection.x;
       }
       if (this.y <= this.radius || this.y >= canvas.height / zoomFactor - this.radius) {
         this.velocityY = -this.velocityY;
-        this.initialDirection.y = -this.initialDirection.y; // Update initial direction
+        this.initialDirection.y = -this.initialDirection.y;
       }
     }
   }
@@ -562,7 +553,7 @@ class Chain {
     this.isMainBeam = isMainBeam;
     this.chainedEnemies = new Set([startEnemy]);
     this.chainLinks = [];
-    this.chainHits(startEnemy, maxChains, 0); // Pass chain depth
+    this.chainHits(startEnemy, maxChains, 0);
   }
 
   chainHits(currentEnemy, remainingChains, depth) {
@@ -571,13 +562,13 @@ class Chain {
     currentEnemy.updateSortedEnemies(this.enemies);
 
     for (let enemy of currentEnemy.sortedEnemies) {
-      if (this.chainedEnemies.has(enemy)) continue; // Skip already chained enemies
+      if (this.chainedEnemies.has(enemy)) continue;
 
       const distance = calculateDistance(currentEnemy.x, currentEnemy.y, enemy.x, enemy.y);
 
       if (distance <= chainRadius) {
         this.chainedEnemies.add(enemy);
-        this.chainLinks.push({ from: currentEnemy, to: enemy }); // Add the link
+        this.chainLinks.push({ from: currentEnemy, to: enemy });
 
         if (this.isMainBeam) {
           enemy.isHit = true;
@@ -588,10 +579,7 @@ class Chain {
           }
         }
 
-        // Update enemy chain info
         enemy.addChainInfo(this, depth + 1);
-
-        // Chain to the next enemy
         this.chainHits(enemy, remainingChains - 1, depth + 1);
         break;
       }
@@ -599,14 +587,17 @@ class Chain {
   }
 
   drawChainLinks(ctx) {
-    if (!showBeams) return; // Skip drawing if beams are toggled off
+    if (!showBeams) return;
 
     ctx.globalAlpha = 0.3;
 
     for (let link of this.chainLinks) {
-      // Draw the black outline first
+      const linkWidth = 0.2;
+      const outlineWidth = 0.05;
+
+      // outline
       ctx.strokeStyle = "#000000";
-      ctx.lineWidth = 0.25; // Slightly thicker to ensure the outline is visible
+      ctx.lineWidth = linkWidth + outlineWidth;
       ctx.beginPath();
       ctx.moveTo(link.from.x, link.from.y);
       ctx.lineTo(link.to.x, link.to.y);
@@ -614,7 +605,7 @@ class Chain {
 
       // Set composite operation to 'destination-out' to cut out the inner part
       ctx.globalCompositeOperation = "destination-out";
-      ctx.lineWidth = 0.2; // Slightly thinner than the outline
+      ctx.lineWidth = linkWidth;
       ctx.beginPath();
       ctx.moveTo(link.from.x, link.from.y);
       ctx.lineTo(link.to.x, link.to.y);
@@ -625,7 +616,7 @@ class Chain {
 
       // Draw the transparent colored line on top
       this.isMainBeam ? (ctx.strokeStyle = mainBeamHitColor) : (ctx.strokeStyle = aoeHitColor);
-      ctx.lineWidth = 0.2;
+      ctx.lineWidth = linkWidth;
       ctx.beginPath();
       ctx.moveTo(link.from.x, link.from.y);
       ctx.lineTo(link.to.x, link.to.y);
@@ -635,14 +626,8 @@ class Chain {
   }
 }
 
-function isSmallScreen() {
-  return window.innerWidth < 768 || window.innerHeight < 600;
-}
-
-// Create a player at the center of the screen
 const player = new Player(canvas.width / 2, canvas.height / 2);
 
-// Create enemies at random positions
 const enemies = [];
 for (let i = 0; i < enemyCount; i++) {
   const x = (Math.random() * 0.8 + 0.1) * canvas.width;
@@ -653,6 +638,10 @@ for (let i = 0; i < enemyCount; i++) {
 let mouseX = canvas.width / 2 / zoomFactor;
 let mouseY = canvas.height / 2 / zoomFactor;
 
+function isSmallScreen() {
+  return window.innerWidth < 768 || window.innerHeight < 600;
+}
+
 function calculateDistance(x1, y1, x2, y2) {
   return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
 }
@@ -661,14 +650,6 @@ function checkBeamCollision(startX, startY, endX, endY) {
   let intersection = false;
 
   player.updateSortedEnemies(enemies);
-
-  // Reset isHit and aoeHit
-  for (let enemy of player.sortedEnemies) {
-    enemy.isHit = false;
-    enemy.aoeHit = false;
-    enemy.isPrimaryTarget = false;
-    enemy.clearChainInfo(); // Clear previous chain info
-  }
 
   for (let enemy of player.sortedEnemies) {
     // Calculate beam segment vector
@@ -679,12 +660,12 @@ function checkBeamCollision(startX, startY, endX, endY) {
     if (beamLength === 0) {
       const distance = calculateDistance(startX, startY, enemy.x, enemy.y);
       if (distance <= enemy.radius && !enemy.isHit) {
-        enemy.hitWithTorid(true, enemies, ctx); // Chain hit to nearby enemies
+        enemy.hitWithTorid(true, enemies, ctx);
         return {
           intersected: true,
           endX: enemy.x,
           endY: enemy.y,
-          enemyHit: enemy, // Return enemy hit status
+          enemyHit: enemy,
         };
       }
       continue;
@@ -704,17 +685,16 @@ function checkBeamCollision(startX, startY, endX, endY) {
       closestY = endY;
     }
 
-    // Calculate distance from the enemy to the closest point
     const closestDistance = calculateDistance(closestX, closestY, enemy.x, enemy.y);
 
     if (closestDistance <= enemy.radius) {
-      isEnemyHit = true; // Mark enemy as hit by the main beam
-      enemy.hitWithTorid(true, enemies, ctx); // Chain hit to nearby enemies
+      isEnemyHit = true;
+      enemy.hitWithTorid(true, enemies, ctx);
       return {
         intersected: true,
         endX: closestX,
         endY: closestY,
-        enemyHit: enemy, // Return enemy hit status
+        enemyHit: enemy,
       };
     }
   }
@@ -723,7 +703,7 @@ function checkBeamCollision(startX, startY, endX, endY) {
     intersected: intersection,
     endX,
     endY,
-    enemyHit: null, // Return enemy hit status
+    enemyHit: null,
   };
 }
 
@@ -797,7 +777,6 @@ function draw() {
     }
   }
 
-  // Count main beam hits
   for (let enemy of enemies) {
     if (enemy.isHit) {
       totalMainBeamHits++;
@@ -807,7 +786,6 @@ function draw() {
     }
   }
 
-  // Draw all enemies
   enemies.forEach((enemy) => enemy.draw(ctx));
 
   // Display debugging information
@@ -825,7 +803,6 @@ function draw() {
   `;
 }
 
-// Handle keypresses
 let keys = {};
 
 window.addEventListener("keydown", (event) => {
@@ -840,7 +817,6 @@ function update() {
   let dx = 0;
   let dy = 0;
 
-  // WASD controls
   if (keys["w"] || keys["ArrowUp"]) {
     dy = -player.speed;
   }
@@ -860,20 +836,12 @@ function update() {
     dy *= Math.SQRT1_2;
   }
 
-  // Update player position based on keys pressed
   player.updatePosition(dx, dy);
-
-  // Update enemy positions randomly
   enemies.forEach((enemy) => enemy.updatePosition());
-
-  // Redraw the canvas
   draw();
-
-  // Call update again on the next animation frame
   requestAnimationFrame(update);
 }
 
-// Update mouse position and LMB state
 canvas.addEventListener("mousemove", (event) => {
   const rect = canvas.getBoundingClientRect();
   mouseX = (event.clientX - rect.left) / zoomFactor;
@@ -926,8 +894,6 @@ function resetGame() {
     const y = (Math.random() * 0.8 + 0.1) * canvas.height;
     enemies.push(new Enemy(x, y));
   }
-
-  // Redraw the canvas
   draw();
 }
 

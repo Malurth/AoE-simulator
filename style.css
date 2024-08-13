@@ -149,12 +149,11 @@ button {
   pointer-events: auto;
 }
 
-/* Hide the default checkbox */
 input[type="checkbox"] {
   display: none;
 }
 
-/* Create a custom rectangular button */
+/* Create a custom rectangular checkbox button */
 input[type="checkbox"] + label {
   display: inline-block;
   padding: 5px 10px;
@@ -166,7 +165,6 @@ input[type="checkbox"] + label {
   transition: background-color 0.3s;
 }
 
-/* Change background color when checked */
 input[type="checkbox"]:checked + label {
   background-color: green;
 }
