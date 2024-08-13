@@ -22,7 +22,9 @@
                             <span id="zoomFactorValue"></span>
                         </div>
                         <input type="checkbox" id="toggleCircles" data-state="off">
-                        <label for="toggleCircles">Chain Range Indicators</label>
+                        <label for="toggleCircles"
+                            title="Green = stacking AoE indicators (1 per connected chain), yellow = 1 AoE indicator allowed per enemy, red = off.">Chain
+                            Range Indicators</label>
 
                         <input type="checkbox" id="toggleBeams" checked>
                         <label for="toggleBeams">Connecting Beams</label>
@@ -33,34 +35,42 @@
                         <input type="checkbox" id="toggleDamageNumbers" checked>
                         <label for="toggleDamageNumbers">Show Damage Numbers</label>
                         <input type="checkbox" id="toggleStatusChance">
-                        <label for="toggleStatusChance">Show Status Chance</label>
+                        <label for="toggleStatusChance"
+                            title="status chance is just 100% (of your base status chance) per chain, except for the main beam('s chain) which is also affected by multishot">Show
+                            Status Chance</label>
                         <input type="checkbox" id="firestormToggle">
-                        <label for="firestormToggle">Primed Firestorm</label>
+                        <label for="firestormToggle" title="off is 3m AoE, on is 4.32m AoE">Primed Firestorm</label>
                     </div>
                     <div id="underControlPanel">
                         <div id="toridPanel">
-                            <div class="slider-container">
+                            <div class="slider-container" title="default 40m">
                                 <label for="beamLengthInput">Beam Length:</label>
                                 <input type="range" id="beamLengthInput" min="10" max="100" step="1">
                                 <span id="beamLengthValue"></span>
                             </div>
-                            <div class="slider-container">
-                                <label for="maxChainDepthInput">Max Chain Depth:</label>
+                            <div class="slider-container" title="default 5 links">
+                                <label for="maxChainDepthInput">Max Chain Length:</label>
                                 <input type="range" id="maxChainDepthInput" min="1" max="10" step="1">
                                 <span id="maxChainDepthValue">5</span>
                             </div>
-                            <div class="slider-container">
+                            <div class="slider-container" title="default 6m">
                                 <label for="chainRadiusInput">Chain Radius:</label>
                                 <input type="range" id="chainRadiusInput" min="1" max="10" step="1">
                                 <span id="chainRadiusValue">6</span>
                             </div>
                             <div>
-                                <button id="resetButton">Reset</button>
+                                <button id="resetButton"
+                                    title="reset normally unchangeable Torid values to default/actual values">Reset</button>
                                 <input type="checkbox" id="useMultishot" checked>
-                                <label for="useMultishot">Use Multishot</label>
+                                <label for="useMultishot"
+                                    title="when enabled, the target directly hit by the beam, and all the targets it chains to, have their status chance and damage multiplied by the multishot % for that particular chain. Denoted as a Beam Hit in the legend.">Use
+                                    Multishot</label>
                                 <input type="checkbox" id="useMultishotAs100Percent" checked>
-                                <label for="useMultishotAs100Percent" id="useMultishotAs100PercentLabel">as 100%</label>
-                                <input type="text" id="multishotCountInput" min="100" max="1000" step="1">
+                                <label for="useMultishotAs100Percent" id="useMultishotAs100PercentLabel"
+                                    title="when enabled, all damage/status numbers are normalized to the multishot value as 100%, or in other words all numbers are just divided by that value first. Treats multishot damage as 'full' damage as opposed to boosted damage, basically.">as
+                                    100%</label>
+                                <input type="text" id="multishotCountInput" min="100" max="1000" step="1"
+                                    title="Multishot, as a total % (300 is 3x damage/status, for example)">
                             </div>
                         </div>
                         <div id="enemyPanel">
@@ -74,7 +84,8 @@
                                 <input type="range" id="enemySpeedInput" min="0" max="10" step="0.1">
                                 <span id="enemySpeedValue"></span>
                             </div>
-                            <div class="slider-container">
+                            <div class="slider-container"
+                                title="this is the only size I am unsure of. 0.5m radius default is a guess tbh, but this should also vary based on enemy hitbox anyway">
                                 <label for="entitySizeInput">Entity Size:</label>
                                 <input type="range" id="entitySizeInput" min="0.2" max="1" step="0.1">
                                 <span id="entitySizeValue"></span>
