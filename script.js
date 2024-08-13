@@ -26,7 +26,7 @@ let beamColor = "#FFFFFF";
 let playerColor = "#61dafb";
 
 let multishot = 300;
-let enemySpeed = 1;
+let enemySpeed = 0.1;
 let entitySize = 0.5;
 let zoomFactor = isSmallScreen() ? 30 : 50;
 let enemyCount = isSmallScreen() ? 25 : 50;
