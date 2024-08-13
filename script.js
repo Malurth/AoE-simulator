@@ -1,11 +1,8 @@
 //TODO: fix UI so it works well with any dimension window
 //TODO: cool little ui popup or tooltip or something explaining features
 //TODO: general cleanup/refactor and un-GPT-ifying lol
-//TODO: improve/implement enemy size controls
 //TODO: enemy spawn controls?
 //TODO: expand scope to saryn spore/miasma simulation?
-//TODO: ememy controls panel
-//TODO: hide UI button
 //TODO: fix instructions not appearing good on mobile
 
 // Get the canvas element and context
