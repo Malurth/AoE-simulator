@@ -449,18 +449,22 @@ class Enemy extends Entity {
     }
 
     // Draw the number of chains above the enemy in bold
-    ctx.font = `bold ${0.8 * entitySize}px Arial`;
+    ctx.save(); //apparently if you don't save + restore it doesn't work in Firefox. go figure
+    ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset to unscaled
+    ctx.font = `bold ${0.8 * entitySize * zoomFactor}px Arial`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.lineWidth = 0.05;
+    ctx.lineWidth = 0.05 * zoomFactor;
     ctx.fillStyle = "#000000";
-    ctx.fillText(this.chains.length, this.x, this.y + entitySize / 15);
+    ctx.fillText(this.chains.length, this.x * zoomFactor, (this.y + entitySize / 15) * zoomFactor);
+    ctx.restore();
 
     // Calculate and draw the total damage percentage and status chance above the enemy
     if (showDamageNumbers || showStatusChance) {
       let partialScaleFactor = 1 + Math.log(100 / zoomFactor);
       let fontSize = 0.3 * partialScaleFactor;
       ctx.font = `${fontSize}px Arial`;
+      ctx.textAlign = "center";
       const { totalDamage, mainBeamDamage, aoeDamage, statusChance } = this.calculateTotalDamageAndStatus();
       ctx.strokeStyle = "#000000";
       ctx.fillStyle = "#FFFFFF";
