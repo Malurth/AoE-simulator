@@ -13,6 +13,9 @@ canvas.height = window.innerHeight;
 
 const beamWidth = 0.2;
 const playerSpeed = 5;
+const toridBaseAoE = 3;
+const baseFirestormMult = 1.24;
+const primedFirestormMult = 1.44;
 
 let enemyColor = "#FF0000";
 let mainBeamHitColor = "#00FF00";
@@ -25,7 +28,7 @@ let enemySpeed = 0.1;
 let entitySize = 0.5;
 let zoomFactor = isSmallScreen() ? 30 : 50;
 let enemyCount = isSmallScreen() ? 25 : 50;
-let toridBaseAoE = 3;
+let toridFinalAoE = toridBaseAoE;
 let aoeOpacity = 0.05;
 let baseBeamLength = 40;
 let maxChainDepth = 5;
@@ -61,6 +64,7 @@ const uiContainer = document.getElementById("ui-container");
 const hideUIButton = document.getElementById("hideUIButton");
 const showUIButton = document.getElementById("showUIButton");
 const firestormToggle = document.getElementById("firestormToggle");
+const primedToggle = document.getElementById("primedToggle");
 
 let showCircles = toggleCirclesCheckbox.dataset.state;
 let showBeams = toggleBeamsCheckbox.checked;
@@ -69,7 +73,8 @@ let showDamageNumbers = toggleDamageNumbersCheckbox.checked;
 let showStatusChance = false;
 let useMultishot = useMultishotCheckbox.checked;
 let useMultishotAs100Percent = useMultishotAs100PercentCheckbox.checked;
-let isPrimedFirestormActive = false;
+let isFirestormActive = false;
+let isFirestormPrimed = true;
 
 if (showCircles === "full") {
   toggleCirclesCheckbox.nextElementSibling.style.backgroundColor = "green";
@@ -185,9 +190,15 @@ enemyCountInput.addEventListener("input", () => {
   draw();
 });
 
+primedToggle.addEventListener("change", () => {
+  isFirestormPrimed = primedToggle.checked;
+  toridFinalAoE = isFirestormActive ? (isFirestormPrimed ? toridBaseAoE * primedFirestormMult : toridBaseAoE * baseFirestormMult) : toridBaseAoE;
+  draw();
+});
+
 firestormToggle.addEventListener("change", () => {
-  isPrimedFirestormActive = firestormToggle.checked;
-  toridBaseAoE = isPrimedFirestormActive ? 4.32 : 3;
+  isFirestormActive = firestormToggle.checked;
+  toridFinalAoE = isFirestormActive ? (isFirestormPrimed ? toridBaseAoE * primedFirestormMult : toridBaseAoE * baseFirestormMult) : toridBaseAoE;
   draw();
 });
 
@@ -224,7 +235,8 @@ document.getElementById("multishotCountInput").value = multishot;
 document.getElementById("enemySpeedInput").value = enemySpeed;
 document.getElementById("enemySpeedValue").textContent = enemySpeed;
 
-firestormToggle.checked = isPrimedFirestormActive;
+firestormToggle.checked = isFirestormActive;
+primedToggle.checked = isFirestormPrimed;
 // #endregion
 
 // #region Color Picker / Legend
@@ -759,7 +771,7 @@ function draw() {
     mainBeamDirectHits++;
   }
   ctx.beginPath();
-  ctx.arc(collisionResult.endX, collisionResult.endY, toridBaseAoE, 0, Math.PI * 2);
+  ctx.arc(collisionResult.endX, collisionResult.endY, toridFinalAoE, 0, Math.PI * 2);
   ctx.strokeStyle = beamColor;
   ctx.lineWidth = 1 / zoomFactor;
   ctx.stroke();
@@ -775,7 +787,7 @@ function draw() {
     if (enemy === collisionResult.enemyHit) continue;
 
     const distanceToAoE = calculateDistance(collisionResult.endX, collisionResult.endY, enemy.x, enemy.y);
-    if (distanceToAoE <= toridBaseAoE) {
+    if (distanceToAoE <= toridFinalAoE) {
       enemy.hitWithTorid(false, enemies, ctx);
       aoeDirectHits++;
     }
@@ -855,18 +867,18 @@ canvas.addEventListener("mousemove", (event) => {
 
 canvas.addEventListener("mousedown", (event) => {
   if (event.button === 0) {
-    isPrimedFirestormActive = true;
+    isFirestormActive = true;
     firestormToggle.checked = true;
-    toridBaseAoE = 4.32; // primed firestorm
+    toridFinalAoE = isFirestormActive ? (isFirestormPrimed ? toridBaseAoE * primedFirestormMult : toridBaseAoE * baseFirestormMult) : toridBaseAoE;
     draw();
   }
 });
 
 canvas.addEventListener("mouseup", (event) => {
   if (event.button === 0) {
-    isPrimedFirestormActive = false;
+    isFirestormActive = false;
     firestormToggle.checked = false;
-    toridBaseAoE = 3; // regular
+    toridFinalAoE = toridBaseAoE; // regular
     draw();
   }
 });
